@@ -91,11 +91,55 @@
     <div class="article-entry" itemprop="articleBody">
       
         <p>1, 修改机器ip</p>
+<pre><code>    $sudo nano /etc/network/interfaces
+    会出一个类似记事本的编辑环境，如果你只是改ip，直接改掉就可以了，
+如果外网是用的阿里云已经提供好的ip,就不要随意更改了
+但是内网的ip需要自己配置，内网配置成192.168.1.212就可以
+这块一定要搞明白，搞不明白去百度，没改明白之前，随便更改会登录不上服务器。
+    # The loopback network interface
+    auto lo
+    iface lo inet loopback
+
+    # The primary network interface
+    auto eth0
+    iface eth0 inet static
+            address 192.168.0.212
+            netmask 255.255.255.0
+            network 192.168.0.0
+            broadcast 192.168.0.255
+            gateway 192.168.0.1
+    auto eth1
+            iface eth1 inet static
+            address 192.168.1.212
+            netmask 255.255.255.0
+</code></pre><p>执行下以下命令，使修改生效<br>        $sudo /etc/init.d/networking restart</p>
+<p>2, 设置DNS服务器<br>        $sudo nano /etc/resolv.conf<br>        在编辑器中输入以下内容<br>        nameserver 211.167.97.67<br>        nameserver 211.167.97.200</p>
+<p>3, 配置更新源<br>        sudo cp /etc/apt/sources.list /etc/apt/sources.list.bak #备份<br>    sudo vim /etc/apt/sources.list #修改</p>
+<pre><code>deb http://mirrors.aliyun.com/ubuntu/ trusty main restricted universe multiverse
+deb http://mirrors.aliyun.com/ubuntu/ trusty-security main restricted universe multiverse
+deb http://mirrors.aliyun.com/ubuntu/ trusty-updates main restricted universe multiverse
+deb http://mirrors.aliyun.com/ubuntu/ trusty-proposed main restricted universe multiverse
+deb http://mirrors.aliyun.com/ubuntu/ trusty-backports main restricted universe multiverse
+deb-src http://mirrors.aliyun.com/ubuntu/ trusty main restricted universe multiverse
+deb-src http://mirrors.aliyun.com/ubuntu/ trusty-security main restricted universe multiverse
+deb-src http://mirrors.aliyun.com/ubuntu/ trusty-updates main restricted universe multiverse
+deb-src http://mirrors.aliyun.com/ubuntu/ trusty-proposed main restricted universe multiverse
+deb-src http://mirrors.aliyun.com/ubuntu/ trusty-backports main restricted universe multiverse
+</code></pre><p> 退出保存后输入以下命令更新源<br>        $sudo apt-get update<br>        输入以下命令更新系统到最新状态<br>        $sudo apt-get upgrade</p>
+<p>4, 将自定义动态库加入系统cache中<br>        我们可能有一些自己开发的动态库(linux下扩展名为.so)，为了让软件在运行时能找到动态库，我们需要将动态库的目录加入到系统cache中, 输入以下命令<br>        $sudo nano /etc/ld.so.conf<br>        假设我的动态库放在/home/XXXXX/public，我们只需要在文件中添加<br>        /home/XXXX/public/<br>        退出保存后执行以下命令让设置生效<br>        $sudo ldconfig -v<br>        提示一下: 如果执行该命令之后你又向目录中放入了新的so文件，你需要重新执行该命令</p>
+<p>5, 安装常用软件<br>      安装mysql客户端运行组件(游戏服务器需要用到)<br>                $sudo apt-get install　libmysqlclient-dev</p>
+<p>6, 安装mysql server<br>        $sudo apt-get install mysql-server-5.5</p>
+<pre><code>此过程一定要记住mysql的root密码，密码尽量设置复杂一点。
+
+$sudo nano /etc/mysql/my.cnf
+    找到文件的[mysqld]配置节，添加以下行，如果文件中已经有了该项，你只需要将值更新即可,
+    bind-address            = 192.168.1.212 (ip地址更新为服务器的实际内网地址)
+</code></pre><p> 修改完成后保存退出，运行以下命令使用新的配置文件重新启动mysql服务器<br>        $sudo /etc/init.d/mysql restart</p>
 
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/05/19/PostTest/" data-id="cj4r1wshh00000oodeg0d2xci" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2017/05/19/PostTest/" data-id="cj4r2pps30000dwodzl5u1rn4" class="article-share-link">Share</a>
       
       
     </footer>
@@ -140,7 +184,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/05/19/hello-world/" data-id="cj4r1wshu00010oodsxrsu3ki" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2017/05/19/hello-world/" data-id="cj4r2ppsd0001dwod107c4myq" class="article-share-link">Share</a>
       
       
     </footer>
