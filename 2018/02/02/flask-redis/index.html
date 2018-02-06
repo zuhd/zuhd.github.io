@@ -6,14 +6,21 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="http://yoursite.com">
-  <title>Archives: 2017/12 | zuhd&#39;s blog</title>
+  <title>一次flask+redis的微服务实战 | zuhd&#39;s blog</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta property="og:type" content="website">
-<meta property="og:title" content="zuhd&#39;s blog">
-<meta property="og:url" content="http://yoursite.com/archives/2017/12/index.html">
+  <meta name="description" content="0x00 背景先说一下需求的场景，策划部门想做一个垂直领域的社区产品，类似与知乎那种，但受益人群是金融行业的从业人员。产品中有一个搜索问题的需求，搜索的问题去题库中进行模糊匹配，终端支持H5/APP/小程序，甚至是微信的自动回复，用过ItChat的人都知道这个强大的工具包，不过最近好像有封号的动作了。做搜索，肯定就会用到分词，当前开源的分词库jieba是做的比较好的了，分析了一下技术栈，就决定用">
+<meta name="keywords" content="后台框架">
+<meta property="og:type" content="article">
+<meta property="og:title" content="一次flask+redis的微服务实战">
+<meta property="og:url" content="http://yoursite.com/2018/02/02/flask-redis/index.html">
 <meta property="og:site_name" content="zuhd&#39;s blog">
+<meta property="og:description" content="0x00 背景先说一下需求的场景，策划部门想做一个垂直领域的社区产品，类似与知乎那种，但受益人群是金融行业的从业人员。产品中有一个搜索问题的需求，搜索的问题去题库中进行模糊匹配，终端支持H5/APP/小程序，甚至是微信的自动回复，用过ItChat的人都知道这个强大的工具包，不过最近好像有封号的动作了。做搜索，肯定就会用到分词，当前开源的分词库jieba是做的比较好的了，分析了一下技术栈，就决定用">
+<meta property="og:image" content="http://ozjsp6i21.bkt.clouddn.com/blog/180206/9Ch6C9L3i8.png?imageslim">
+<meta property="og:updated_time" content="2018-02-06T08:02:46.824Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="zuhd&#39;s blog">
+<meta name="twitter:title" content="一次flask+redis的微服务实战">
+<meta name="twitter:description" content="0x00 背景先说一下需求的场景，策划部门想做一个垂直领域的社区产品，类似与知乎那种，但受益人群是金融行业的从业人员。产品中有一个搜索问题的需求，搜索的问题去题库中进行模糊匹配，终端支持H5/APP/小程序，甚至是微信的自动回复，用过ItChat的人都知道这个强大的工具包，不过最近好像有封号的动作了。做搜索，肯定就会用到分词，当前开源的分词库jieba是做的比较好的了，分析了一下技术栈，就决定用">
+<meta name="twitter:image" content="http://ozjsp6i21.bkt.clouddn.com/blog/180206/9Ch6C9L3i8.png?imageslim">
   
     <link rel="alternative" href="/atom.xml" title="zuhd&#39;s blog" type="application/atom+xml">
   
@@ -141,60 +148,177 @@
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            
-  
-  
+            <article id="post-flask-redis" class="article article-type-post " itemscope itemprop="blogPost">
+  <div class="article-inner">
     
-    
-      
-      
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2017" class="archive-year">2017</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2017/12/29/my2017/" class="archive-article-date">
-  	<time datetime="2017-12-29T11:29:34.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2017-12-29</time>
-</a>
-        </div>
-    	 
+      <header class="article-header">
+        
   
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2017/12/29/my2017/">2017，我很怀念它</a>
+    <h1 class="article-title" itemprop="name">
+      一次flask+redis的微服务实战
     </h1>
   
 
-        <div class="article-info info-on-right">
-          
+        
+        <a href="/2018/02/02/flask-redis/" class="archive-article-date">
+  	<time datetime="2018-02-02T08:39:34.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-02-02</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p><img src="http://ozjsp6i21.bkt.clouddn.com/blog/180206/9Ch6C9L3i8.png?imageslim" alt="flask"></p>
+<h1 id="0x00-背景"><a href="#0x00-背景" class="headerlink" title="0x00 背景"></a>0x00 背景</h1><p>先说一下需求的场景，策划部门想做一个垂直领域的社区产品，类似与知乎那种，但受益人群是金融行业的从业人员。产品中有一个搜索问题的需求，搜索的问题去题库中进行模糊匹配，终端支持H5/APP/小程序，甚至是微信的自动回复，用过ItChat的人都知道这个强大的工具包，不过最近好像有封号的动作了。做搜索，肯定就会用到分词，当前开源的分词库jieba是做的比较好的了，分析了一下技术栈，就决定用flask来实现一个微服务，供其他的服务模块使用。</p>
+<p>本人会着重讲一下环境的搭建，各种配置的坑。</p>
+<h1 id="0x01-升级操作系统"><a href="#0x01-升级操作系统" class="headerlink" title="0x01 升级操作系统"></a>0x01 升级操作系统</h1><p>操作系统：CentOS 6.x<br>CentOS 7的玩家手动跳过该环节。首先6.x的版本，默认装的python的版本是2.6的版本，这个版本后面用到的一些软件支持的不是很好，所以我们首先要把python升级到2.7的版本。先创建一个update.sh脚本，然后把下面内容复制进去。<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span>!/usr/bin/env bash</span><br><span class="line"><span class="meta">#</span>安装依赖</span><br><span class="line">yum install openssl openssl-devel zlib-devel gcc -y</span><br><span class="line"><span class="meta">#</span> apt-get install libssl-dev</span><br><span class="line"><span class="meta">#</span> apt-get install openssl openssl-devel</span><br><span class="line"><span class="meta">#</span> 下载源码</span><br><span class="line">wget http://www.python.org/ftp/python/2.7.12/Python-2.7.12.tgz</span><br><span class="line">tar -zxvf Python-2.7.12.tgz</span><br><span class="line">cd Python-2.7.12</span><br><span class="line">mkdir /usr/local/python2.7.12</span><br><span class="line"><span class="meta">#</span> 开启zlib编译选项</span><br><span class="line"><span class="meta">#</span> sed -i '467c zlib zlibmodule.c -I$(prefix)/include -L$(exec_prefix)/lib -lz' Module/Setup</span><br><span class="line">sed '467s/^#//g' Module/Setup</span><br><span class="line"></span><br><span class="line">./configure --prefix=/usr/local/python2.7.12</span><br><span class="line">make</span><br><span class="line">make install</span><br><span class="line">if [ $? -eq 0 ];then</span><br><span class="line">     echo "Python2.7.12升级完成"</span><br><span class="line">else</span><br><span class="line">     echo "Python2.7.12升级失败，查看报错信息手动安装"</span><br><span class="line">fi</span><br><span class="line">cd</span><br><span class="line">mv /usr/bin/python /usr/bin/python2.6.6</span><br><span class="line">ln -s /usr/local/python2.7.12/bin/python2.7 /usr/bin/python</span><br><span class="line"></span><br><span class="line">sed -i '1s/python/python2.6/g' /usr/bin/yum</span><br><span class="line">wget --no-check-certificate https://bootstrap.pypa.io/get-pip.py</span><br><span class="line">python get-pip.py</span><br><span class="line">if [ $? -eq 0 ];then</span><br><span class="line">     echo "pip升级完成"</span><br><span class="line">else</span><br><span class="line">     echo "pip安装失败，查看报错信息手动安装"</span><br><span class="line">fi</span><br><span class="line">rm -rf /usr/bin/pip</span><br><span class="line">ln -s /usr/local/python2.7.12/bin/pip2.7 /usr/bin/pip</span><br></pre></td></tr></table></figure></p>
+<p>然后把这个脚本加上可执行的权限，并且运行。<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">chmod u+x update.sh</span><br><span class="line">./update.sh</span><br></pre></td></tr></table></figure></p>
+<h1 id="0x02-创建python虚拟空间"><a href="#0x02-创建python虚拟空间" class="headerlink" title="0x02 创建python虚拟空间"></a>0x02 创建python虚拟空间</h1><p>这一步完成之后，我们就开始隔离一个虚拟的空间来运行这个微服务，以后我们所有的程序都在隔离的虚拟空间中来运行，有点docker的概念，这样不管是用python2.x还是3.x都可以同时兼容了。<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">pip install virtualenv</span><br><span class="line">cd /home/test/web</span><br><span class="line">virtualenv ENV</span><br><span class="line">cd bin</span><br><span class="line">source active</span><br></pre></td></tr></table></figure></p>
+<p>至此就启动了这个docker，接下来就是在这个docker中安装我们requirement.txt中所需要的包了。<br>我们用的包有如下：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">pip install flask</span><br><span class="line">pip install jieba</span><br><span class="line">pip install pymysql</span><br><span class="line">pip install redis</span><br><span class="line">pip install virtualenv</span><br><span class="line">pip install uwsgi</span><br><span class="line">pip install xlrd</span><br></pre></td></tr></table></figure></p>
+<p>到此为止就可以在ENV的环境中，测试app的功能了，现在python myapp.py试一下各接口功能。</p>
+<h1 id="0x03-安装nginx"><a href="#0x03-安装nginx" class="headerlink" title="0x03 安装nginx"></a>0x03 安装nginx</h1><p>尽管测试成功了，但是线上是不能这么运行的，因为flask只是一个web框架，并不是一个web server的容器，flask自带的werkzeug只能用于开发环境，不能用于生产环境，对于web服务器，我们选择更专业的uWSGI，并且配合nginx作为反向代理。<br>首先，我们安装nginx<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum -y install nginx</span><br></pre></td></tr></table></figure></p>
+<p>默认的nginx的监听端口是80，如果部署在云服务器上，80端口极大的可能被占用了，我们要去修改这个配置文件。<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">cd /etc/nginx</span><br><span class="line">vim conf.d</span><br></pre></td></tr></table></figure></p>
+<p>查看一下配置端口的配置文件在哪里，我们看到是default.conf这个文件中有端口号的配置，我们把所有端口号都改成我们想要的端口比如8100。</p>
+<p>在 /etc/nginx/ngixn.conf 文件的 http 部分添加一条 include 内容，即最后一行<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">http &#123;</span><br><span class="line">    include       mime.types;</span><br><span class="line">    default_type  application/octet-stream;</span><br><span class="line">    sendfile        on;</span><br><span class="line">    keepalive_timeout  65;</span><br><span class="line">    include /etc/nginx/sites-enabled/*;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>创建配置文件 vim /etc/nginx/sites-enabled/hello.conf<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">server &#123;</span><br><span class="line">    # Running port</span><br><span class="line">    listen 8100;</span><br><span class="line">    # 服务器ip 或者域名</span><br><span class="line">    server_name 0.0.0.0;</span><br><span class="line"></span><br><span class="line">    # Proxying connections to application servers</span><br><span class="line">    location / &#123;</span><br><span class="line">        include            uwsgi_params;</span><br><span class="line">        uwsgi_pass         127.0.0.1:5000;//和 uWSGI 配置文件中的 ip端口一致</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>然后看系统中是否有nginx的service脚本<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vim /etc/init.d/nginx</span><br></pre></td></tr></table></figure></p>
+<p>如果没有该脚本，在该脚本中写如下内容：<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span>!/bin/bash</span><br><span class="line"><span class="meta">#</span> chkconfig: - 85 15</span><br><span class="line">nginx=/usr/sbin/nginx</span><br><span class="line">conf=/etc/nginx/nginx.conf</span><br><span class="line"></span><br><span class="line">case $1 in</span><br><span class="line">    start)</span><br><span class="line">        echo -n "Starting Nginx"</span><br><span class="line">        $nginx -c $conf</span><br><span class="line">        echo " done"</span><br><span class="line">    ;;</span><br><span class="line"></span><br><span class="line">    stop)</span><br><span class="line">        echo -n "Stopping Nginx"</span><br><span class="line">        $nginx -s stop</span><br><span class="line">        echo " done"</span><br><span class="line">    ;;</span><br><span class="line"></span><br><span class="line">    test)</span><br><span class="line">        $nginx -t -c $conf</span><br><span class="line">    ;;</span><br><span class="line"></span><br><span class="line">    reload)</span><br><span class="line">        echo -n "Reloading Nginx"</span><br><span class="line">        $nginx -s reload</span><br><span class="line">        echo " done"</span><br><span class="line">    ;;</span><br><span class="line"></span><br><span class="line">    restart)</span><br><span class="line">        $0 stop</span><br><span class="line">        $0 start</span><br><span class="line">    ;;</span><br><span class="line"></span><br><span class="line">    show)</span><br><span class="line">        ps -aux|grep nginx</span><br><span class="line">    ;;</span><br><span class="line"></span><br><span class="line">    *)</span><br><span class="line">        echo -n "Usage: $0 &#123;start|restart|reload|stop|test|show&#125;"</span><br><span class="line">    ;;</span><br><span class="line"></span><br><span class="line">esac</span><br></pre></td></tr></table></figure></p>
+<p>给该文件加上可执行权限<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">chmod u+x nginx</span><br><span class="line">service nginx start</span><br></pre></td></tr></table></figure></p>
+<p>Nginx 在 /var/log/nginx 目录下有 access.log 和 error.log 两个日志文件，如果有问题可以查看这2个日志文件。</p>
+<h1 id="0x04-配置uWSGI"><a href="#0x04-配置uWSGI" class="headerlink" title="0x04 配置uWSGI"></a>0x04 配置uWSGI</h1><p>接下来配置uWSGI的启动文件，创建 uwsgi 配置文件<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vim /etc/uwsgi/apps-enabled/hello.ini</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">[uwsgi]</span></span><br><span class="line">// 开启主线程</span><br><span class="line"><span class="attr">master</span> = <span class="literal">true</span></span><br><span class="line">// 项目目录</span><br><span class="line"><span class="attr">base</span> = /home/test/web</span><br><span class="line">// 移动到项目目录 cd</span><br><span class="line"><span class="attr">chdir</span> = %(base)</span><br><span class="line">// 本地的ip和端口</span><br><span class="line"><span class="attr">socket</span> = <span class="number">127.0</span>.<span class="number">0.1</span>:<span class="number">5000</span></span><br><span class="line">// Python 虚拟环境目录</span><br><span class="line"><span class="attr">home</span> = %(base)/ENV</span><br><span class="line">// 程序启动文件</span><br><span class="line"><span class="attr">wsgi-file</span> = hello.py</span><br><span class="line">// 项目中引用 flask 实例的变量名</span><br><span class="line"><span class="attr">callable</span> = app</span><br><span class="line">// 处理器数</span><br><span class="line"><span class="attr">processes</span> = <span class="number">2</span></span><br><span class="line">// 线程数</span><br><span class="line"><span class="attr">threads</span> = <span class="number">4</span></span><br><span class="line">// 获取uwsgi统计信息的服务地址</span><br><span class="line"><span class="attr">stats</span> = <span class="number">127.0</span>.<span class="number">0.1</span>:<span class="number">9191</span></span><br></pre></td></tr></table></figure>
+<p>保存配置文件，通过 uwsgi -i /etc/uwsgi/apps-enabled/hello.ini，来启动 uwsgi。<br>注意在env的环境下，uwsgi安装的目录不会在/usr/bin中，而是在ENV的bin中，所以<br>在后面的/etc/init.d/uwsgi中的路径要注意。<br>创建uWSGI的日志文件<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vim /var/log/uwsgi/hello.log</span><br></pre></td></tr></table></figure></p>
+<p>创建uWSGI的service文件<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vim /etc/init.d/uwsgi</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span>!/bin/bash</span><br><span class="line"><span class="meta">#</span> chkconfig: - 85 15</span><br><span class="line">uwsgi=/home/test/web/ENV/bin/uwsgi</span><br><span class="line">hello_conf=/etc/uwsgi/apps-enabled/hello.ini</span><br><span class="line"></span><br><span class="line">case $1 in</span><br><span class="line">    start)</span><br><span class="line">        echo -n "Starting uWsgi"</span><br><span class="line">        nohup $uwsgi -i $hello_conf &gt;/var/log/uwsgi/hello.log 2&gt;&amp;1 &amp;</span><br><span class="line">        echo " done"</span><br><span class="line">    ;;</span><br><span class="line"></span><br><span class="line">    stop)</span><br><span class="line">        echo -n "Stopping uWsgi"</span><br><span class="line">        killall -9 uwsgi</span><br><span class="line">        echo " done"</span><br><span class="line">    ;;</span><br><span class="line"></span><br><span class="line">    restart)</span><br><span class="line">        $0 stop</span><br><span class="line">        $0 start</span><br><span class="line">    ;;</span><br><span class="line"></span><br><span class="line">    show)</span><br><span class="line">        ps -ef|grep uwsgi</span><br><span class="line">    ;;</span><br><span class="line"></span><br><span class="line">    *)</span><br><span class="line">        echo -n "Usage: $0 &#123;start|restart|stop|show&#125;"</span><br><span class="line">    ;;</span><br><span class="line"></span><br><span class="line">esac</span><br></pre></td></tr></table></figure>
+<p>添加可执行属性<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo chmod +x /etc/init.d/uwsgi</span><br><span class="line">service uwsgi start</span><br></pre></td></tr></table></figure></p>
+<p>uWSGI 在 /var/log/uwsgi 目录下有项目对应日志，有问题可以查看。</p>
+<h1 id="0x05-redis的安装"><a href="#0x05-redis的安装" class="headerlink" title="0x05 redis的安装"></a>0x05 redis的安装</h1><p>首先安装redis的编译工具gcc和gcc-c++<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum install gcc gcc-c++</span><br></pre></td></tr></table></figure></p>
+<p>然后从redis的官网上下载redis并且安装<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">wget http://download.redis.io/releases/redis-3.2.5.tar.gz</span><br><span class="line">tar -zxvf /soft/redis-3.2.5.tar.gz</span><br><span class="line">cd redis-3.2.5</span><br><span class="line">make &amp; make install</span><br></pre></td></tr></table></figure></p>
+<p>然后配置redis.conf<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">bind 0.0.0.0</span><br><span class="line"># 3.x版本，将此属性关闭</span><br><span class="line">protected-mode no</span><br></pre></td></tr></table></figure></p>
+<p>添加redis的service服务<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vim /etc/init.d/redis</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span>!/bin/sh</span><br><span class="line"><span class="meta">#</span></span><br><span class="line"><span class="meta">#</span> Simple Redis init.d script conceived to work on Linux systems</span><br><span class="line"><span class="meta">#</span> as it does use of the /proc filesystem.</span><br><span class="line"></span><br><span class="line">REDISPORT=6379</span><br><span class="line">EXEC=/usr/local/bin/redis-server</span><br><span class="line">CLIEXEC=/usr/local/bin/redis-cli</span><br><span class="line"></span><br><span class="line">PIDFILE=/var/run/redis_$&#123;REDISPORT&#125;.pid</span><br><span class="line">CONF="/etc/redis/$&#123;REDISPORT&#125;.conf"</span><br><span class="line"></span><br><span class="line">case "$1" in</span><br><span class="line">    start)</span><br><span class="line">        if [ -f $PIDFILE ]</span><br><span class="line">        then</span><br><span class="line">                echo "$PIDFILE exists, process is already running or crashed"</span><br><span class="line">        else</span><br><span class="line">                echo "Starting Redis server..."</span><br><span class="line">                $EXEC $CONF</span><br><span class="line">        fi</span><br><span class="line">        ;;</span><br><span class="line">    stop)</span><br><span class="line">        if [ ! -f $PIDFILE ]</span><br><span class="line">        then</span><br><span class="line">                echo "$PIDFILE does not exist, process is not running"</span><br><span class="line">        else</span><br><span class="line">                PID=$(cat $PIDFILE)</span><br><span class="line">                echo "Stopping ..."</span><br><span class="line">                $CLIEXEC -p $REDISPORT shutdown</span><br><span class="line">                while [ -x /proc/$&#123;PID&#125; ]</span><br><span class="line">                do</span><br><span class="line">                    echo "Waiting for Redis to shutdown ..."</span><br><span class="line">                    sleep 1</span><br><span class="line">                done</span><br><span class="line">                echo "Redis stopped"</span><br><span class="line">        fi</span><br><span class="line">        ;;</span><br><span class="line">    *)</span><br><span class="line">        echo "Please use start or stop as first argument"</span><br><span class="line">        ;;</span><br><span class="line">esac</span><br></pre></td></tr></table></figure>
+<p>然后启动服务<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">chmod u+x redis</span><br><span class="line">service redis start</span><br></pre></td></tr></table></figure></p>
+<h1 id="0x06-python中引入redis作为缓存"><a href="#0x06-python中引入redis作为缓存" class="headerlink" title="0x06 python中引入redis作为缓存"></a>0x06 python中引入redis作为缓存</h1><p>我们知道redis是k-v的数据缓存机制，当缓存数据为string, 或是hash类型的时候，都有原生的函数支持，具体可以参考redis的API文档。<br>但是当我们缓存我们自定义的实体类的时候，有点力不从心，这时候可以用pickle库来做序列化，先把实体类转换成string类型存储在redis中，取出的时候，再做反序列化的操作，具体代码如下：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#coding=utf-8</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> redis</span><br><span class="line"><span class="keyword">import</span> pickle</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Redis</span>:</span></span><br><span class="line"><span class="meta">    @staticmethod</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">connect</span><span class="params">(host=<span class="string">'localhost'</span>, port=<span class="number">6379</span>, db=<span class="number">0</span>)</span>:</span></span><br><span class="line">        r = redis.StrictRedis(host, port, db)</span><br><span class="line">        <span class="keyword">return</span> r</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 将内存数据二进制通过序列号转为文本流，再存入redis</span></span><br><span class="line"><span class="meta">    @staticmethod</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">set_data</span><span class="params">(r, key, data, ex=None)</span>:</span></span><br><span class="line">        r.set(pickle.dumps(key), pickle.dumps(data), ex)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 将文本流从redis中读取并反序列化，返回</span></span><br><span class="line"><span class="meta">    @staticmethod</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">get_data</span><span class="params">(r, key)</span>:</span></span><br><span class="line">        data = r.get(pickle.dumps(key))</span><br><span class="line">        <span class="keyword">if</span> data <span class="keyword">is</span> <span class="keyword">None</span>:</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">None</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> pickle.loads(data)</span><br></pre></td></tr></table></figure></p>
+<p>0x07 总结<br>到此为止，一个flask的app的部署就基本完成了，中间的环节比较琐碎，但互联网上的资料也很多，基本都可以解决，祝大家玩的开心！</p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
 	<div class="article-tag tagcloud">
 		<i class="icon-price-tags icon"></i>
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">生活感悟</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">后台框架</a>
         		</li>
       		
 		</ul>
 	</div>
 
-          
+      
 
+      
+
+      
+        
+<div class="share-btn share-icons tooltip-left">
+  <div class="tooltip tooltip-east">
+    <span class="tooltip-item">
+      <a href="javascript:;" class="share-sns share-outer">
+        <i class="icon icon-share"></i>
+      </a>
+    </span>
+    <span class="tooltip-content">
+      <div class="share-wrap">
+        <div class="share-icons">
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="icon icon-weibo"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="icon icon-weixin"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="icon icon-qq"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="icon icon-douban"></i>
+          </a>
+          <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a>
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="icon icon-facebook"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="icon icon-twitter"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="icon icon-google"></i>
+          </a>
         </div>
-        <div class="clearfix"></div>
-    </header>
+      </div>
+    </span>
+  </div>
+</div>
+
+<div class="page-modal wx-share js-wx-box">
+    <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="http://s.jiathis.com/qrcode.php?url=http://yoursite.com/2018/02/02/flask-redis/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div class="mask js-mask"></div>
+      
+      <div class="clearfix"></div>
+    </div>
   </div>
 </article>
+
+  
+<nav id="article-nav">
   
   
-    </div></section>
+    <a href="/2017/12/29/my2017/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">2017，我很怀念它</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+  
+  
   
 
-    
+  
+
+  
+
+  
 
 
           </div>
@@ -217,8 +341,8 @@
 	var yiliaConfig = {
 		mathjax: false,
 		isHome: false,
-		isPost: false,
-		isArchive: true,
+		isPost: true,
+		isArchive: false,
 		isTag: false,
 		isCategory: false,
 		open_in_new: false,
