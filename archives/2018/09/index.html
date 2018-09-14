@@ -6,28 +6,14 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="http://yoursite.com">
-  <title>比特币源码研读---开篇 | zuhd&#39;s blog</title>
+  <title>Archives: 2018/9 | zuhd&#39;s blog</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="0x00 为啥要读如果说是在18年以前阅读比特币代码，是价值投资的基本操作，那今年再去做这个事，绝逼是信仰了。比特币作为虚拟货币的开山鼻祖，运行至今近10年，在没有中心化结构的运营下，几乎没有出现过重大事故，相信BAT的产品也不敢吹这牛逼吧，所以作为技术人员读一读比特币代码是修炼内功的绝佳选择。由于比特币代码相比于我们之前所研发的C(B)/S结构不同，理解起来总会有一些吃力，如果能有一群持有共同">
-<meta name="keywords" content="区块链 比特币">
-<meta property="og:type" content="article">
-<meta property="og:title" content="比特币源码研读---开篇">
-<meta property="og:url" content="http://yoursite.com/2018/08/09/btc-code-0/index.html">
+  <meta property="og:type" content="website">
+<meta property="og:title" content="zuhd&#39;s blog">
+<meta property="og:url" content="http://yoursite.com/archives/2018/09/index.html">
 <meta property="og:site_name" content="zuhd&#39;s blog">
-<meta property="og:description" content="0x00 为啥要读如果说是在18年以前阅读比特币代码，是价值投资的基本操作，那今年再去做这个事，绝逼是信仰了。比特币作为虚拟货币的开山鼻祖，运行至今近10年，在没有中心化结构的运营下，几乎没有出现过重大事故，相信BAT的产品也不敢吹这牛逼吧，所以作为技术人员读一读比特币代码是修炼内功的绝佳选择。由于比特币代码相比于我们之前所研发的C(B)/S结构不同，理解起来总会有一些吃力，如果能有一群持有共同">
-<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/1890474-83a3c757aec621d5.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
-<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/1890474-3f72e08324d7138c.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
-<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/1890474-34eb5b46ec2475d6.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
-<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/1890474-6c4835436d0286cf.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
-<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/1890474-2753980e28bd6b13.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
-<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/1890474-b59d103a2eecbce2.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
-<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/1890474-e1341b54269c7667.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
-<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/1890474-2881ba268371479a.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
-<meta property="og:updated_time" content="2018-08-14T11:13:58.425Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="比特币源码研读---开篇">
-<meta name="twitter:description" content="0x00 为啥要读如果说是在18年以前阅读比特币代码，是价值投资的基本操作，那今年再去做这个事，绝逼是信仰了。比特币作为虚拟货币的开山鼻祖，运行至今近10年，在没有中心化结构的运营下，几乎没有出现过重大事故，相信BAT的产品也不敢吹这牛逼吧，所以作为技术人员读一读比特币代码是修炼内功的绝佳选择。由于比特币代码相比于我们之前所研发的C(B)/S结构不同，理解起来总会有一些吃力，如果能有一群持有共同">
-<meta name="twitter:image" content="https://upload-images.jianshu.io/upload_images/1890474-83a3c757aec621d5.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta name="twitter:title" content="zuhd&#39;s blog">
   
     <link rel="alternative" href="/atom.xml" title="zuhd&#39;s blog" type="application/atom+xml">
   
@@ -155,53 +141,36 @@
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            <article id="post-btc-code-0" class="article article-type-post " itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
+            
   
-    <h1 class="article-title" itemprop="name">
-      比特币源码研读---开篇
+  
+    
+    
+      
+      
+      <section class="archives-wrap">
+        <div class="archive-year-wrap">
+          <a href="/archives/2018" class="archive-year">2018</a>
+        </div>
+        <div class="archives">
+    
+    <article class="archive-article archive-type-post">
+  <div class="archive-article-inner">
+    <header class="archive-article-header">
+      	<div class="article-meta">
+	      	<a href="/2018/09/14/btc-code-transaction/" class="archive-article-date">
+  	<time datetime="2018-09-14T03:12:08.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-09-14</time>
+</a>
+        </div>
+    	 
+  
+    <h1 itemprop="name">
+      <a class="archive-article-title" href="/2018/09/14/btc-code-transaction/">比特币源码研读---交易</a>
     </h1>
   
 
-        
-        <a href="/2018/08/09/btc-code-0/" class="archive-article-date">
-  	<time datetime="2018-08-09T11:30:22.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-08-09</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p><img src="https://upload-images.jianshu.io/upload_images/1890474-83a3c757aec621d5.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="btc.png"></p>
-<h1 id="0x00-为啥要读"><a href="#0x00-为啥要读" class="headerlink" title="0x00 为啥要读"></a>0x00 为啥要读</h1><p>如果说是在18年以前阅读比特币代码，是价值投资的基本操作，那今年再去做这个事，绝逼是信仰了。比特币作为虚拟货币的开山鼻祖，运行至今近10年，在没有中心化结构的运营下，几乎没有出现过重大事故，相信BAT的产品也不敢吹这牛逼吧，所以作为技术人员读一读比特币代码是修炼内功的绝佳选择。由于比特币代码相比于我们之前所研发的C(B)/S结构不同，理解起来总会有一些吃力，如果能有一群持有共同信仰的朋友在一起互开脑洞，共同勉励，那更是一件美妙的事情。机缘巧合认识到国内第一批研读比特币代码的大神@菜菜子，经过几次沟通，大家就决定共同去分析研读比特币的代码，将来有可能是以太坊，甚至更多！</p>
-<h1 id="0x01-阅读思路"><a href="#0x01-阅读思路" class="headerlink" title="0x01 阅读思路"></a>0x01 阅读思路</h1><p>按照我以前的习惯，如果想去学习一门技术，那首先要去学会使用这门技术。话说学习使用比特币成本还是蛮大的，按照今天的行情BTC一枚也要4W多人民币。不过没有关系，我们还有很多其他的山寨币，操作起来也都是大同小异。利用3个月的时间，我从交易所到钱包，从公链到侧链，从炒币到各种DAPP几乎都玩了一遍。这个时候再去学习区块链的技术，知道自己该如何做信息过滤了，身边的同仁也会越来越多，遇到问题的时候，解决起来也就得心应手了。<br>在开始阅读代码之前，《比特币白皮书》和《精通比特币》这两份材料是必须要读的，对，必须。即使读不懂也没关系，至少从宏观上对比特币的技术有个大致的了解，脑子里有区块链模糊的样子，这是很重要的，如果一开始就从某个技术细节入手，比如密码学，P2P，很容易就走进一个死胡同，最后无疾而终。<br><img src="https://upload-images.jianshu.io/upload_images/1890474-3f72e08324d7138c.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="精通比特币.jpg"></p>
-<h1 id="0x02-环境搭建"><a href="#0x02-环境搭建" class="headerlink" title="0x02 环境搭建"></a>0x02 环境搭建</h1><p>工欲善其事，必先利其器。首先我们先选个版本，我用的是Bitcoin Core Daemon version v0.16.99.0-b1dc39d。在开始研读代码之前，我们先把环境搭好。由于常年在Windows下面做开发，我尝试过搭建bitcoin的windows环境，网上也能搜索到教程，但我不推荐大家去这么做，因为这是一个巨坑，详细就不多赘述了。我选择的系统环境是Ubuntu 14.04 Server LTS，我不太喜欢用桌面版。具体搭建的教程在互联网上能搜到@菜菜子的教程，讲的很详细，一步一步做下去就是了。IDE我尝试过几个，sublime，vscode，甚至Idea，我觉得都不够好用，最主要的是对“代码引用”这个功能支持的不好，最后只好祭出了江湖杀器Visual Stuio，但VS导入文件夹的功能不是很友好，只好自己先去Create Filter，然后再导入文件。最后我想强调一点的是关于代码的调试，可能很多朋友喜欢用Log调试，我个人还是喜欢debug，我用的是gdb，不过要注意的是，在make文件之前要修改所有目录下的makefile，把编译的优化禁止掉，也就是把g++的编译选项-O2改成-O0，这样就能跟踪代码的完整的执行流程了。<br><img src="https://upload-images.jianshu.io/upload_images/1890474-34eb5b46ec2475d6.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="gdb.jpg"></p>
-<h1 id="0x03-目录结构-amp-数据结构"><a href="#0x03-目录结构-amp-数据结构" class="headerlink" title="0x03 目录结构&amp;数据结构"></a>0x03 目录结构&amp;数据结构</h1><p>整个的项目的目录结构可以参考下图（图片来源于互联网）<br><img src="https://upload-images.jianshu.io/upload_images/1890474-6c4835436d0286cf.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="目录结构.png"></p>
-<p>读了一下前辈的研读代码，基本都是从函数入口进行介绍的，是基于函数跳转分析的，也就是我们平时调试的callstack。我研读的方式稍有不同，我是从整个比特币的数据结构入手的。我们都知道比特币代码是基于区块链技术的，脑子里都有链表这样的一个概念，一环一环利用指针依次连接起来。如果我们知道每个节点里的数据结构，甚至是内存布局，然后再去分析每个数据结构在代码中扮演的角色，各个数据结构之间的组织方式，是Has-A，还是Is-A，按照这个思路去阅读代码，就轻松愉悦加开心了。<br>首先来分析chain.h和chain.cpp这两个文件，里面包含了这样的类。</p>
-<blockquote>
-<p>CBlockIndex<br>CDiskBlockIndex<br>CChain</p>
-</blockquote>
-<p>类的关系成员变量及关系图如下：<br><img src="https://upload-images.jianshu.io/upload_images/1890474-2753980e28bd6b13.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="BlockIndex.jpg"></p>
-<p>CChain类就更为简单，只有std::vector&lt; CBlockIndex* &gt; vChain这1个成员变量，也就是说区块链在内存中是CBlockIndex指针集合，各个指针之间又通过成员变量pprev和pnex来进行相互连接。呃，为嘛不是直接保存一个pRoot或是pHead指针？</p>
-<p>再来分析block.h和block.cpp这两个文件，里面包含如下几个类。</p>
-<blockquote>
-<p>CBlockHeader<br>CBlock<br>CBlockLocator</p>
-</blockquote>
-<p>类的关系成员变量及关系图如下：<br><img src="https://upload-images.jianshu.io/upload_images/1890474-b59d103a2eecbce2.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="Block.jpg"></p>
-<p>从上面的分析可以看出CBlockIndex是Block的内存索引，Block的详细数据是懒加载(lazy-load)，只有在使用的时候才会用硬盘数据读取。Block在硬盘序列化的数据除了类里的成员变量之外，还有一些额外的数据如下图所示，看到这些是不是很眼熟，在刚开始接触windows PE文件的时候，思路和这个也是类似的。<br><img src="https://upload-images.jianshu.io/upload_images/1890474-e1341b54269c7667.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="BlockDB.jpg"></p>
-<p>有网友总结出来的更简单粗暴的图，如下（图片来源于互联网），这个图，我很喜欢，哈哈哈。<br><img src="https://upload-images.jianshu.io/upload_images/1890474-2881ba268371479a.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="详细.png"></p>
-<h1 id="0x04-总结"><a href="#0x04-总结" class="headerlink" title="0x04 总结"></a>0x04 总结</h1><p>本开篇小节主要讲述了研读BTC代码的动机和方法，立Flag去做一件事情可能会很简单，但能坚持下来是一件很不容易的事情，由于本人能力有限，文中有描述不当的地方，还请大家多多包涵。下一小节，主要讲交易的数据结构，See u then!</p>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
+        <div class="article-info info-on-right">
+          
 	<div class="article-tag tagcloud">
 		<i class="icon-price-tags icon"></i>
 		<ul class="article-tag-list">
@@ -213,115 +182,19 @@
 		</ul>
 	</div>
 
-      
+          
 
-      
-
-      
-        
-<div class="share-btn share-icons tooltip-left">
-  <div class="tooltip tooltip-east">
-    <span class="tooltip-item">
-      <a href="javascript:;" class="share-sns share-outer">
-        <i class="icon icon-share"></i>
-      </a>
-    </span>
-    <span class="tooltip-content">
-      <div class="share-wrap">
-        <div class="share-icons">
-          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
-            <i class="icon icon-weibo"></i>
-          </a>
-          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
-            <i class="icon icon-weixin"></i>
-          </a>
-          <a class="qq share-sns" href="javascript:;" data-type="qq">
-            <i class="icon icon-qq"></i>
-          </a>
-          <a class="douban share-sns" href="javascript:;" data-type="douban">
-            <i class="icon icon-douban"></i>
-          </a>
-          <a class="qzone share-sns" href="javascript:;" data-type="qzone">
-            <i class="icon icon-qzone"></i>
-          </a>
-          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
-            <i class="icon icon-facebook"></i>
-          </a>
-          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
-            <i class="icon icon-twitter"></i>
-          </a>
-          <a class="google share-sns" href="javascript:;" data-type="google">
-            <i class="icon icon-google"></i>
-          </a>
         </div>
-      </div>
-    </span>
-  </div>
-</div>
-
-<div class="page-modal wx-share js-wx-box">
-    <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
-    <p>扫一扫，分享到微信</p>
-    <div class="wx-qrcode">
-      <img src="http://s.jiathis.com/qrcode.php?url=http://yoursite.com/2018/08/09/btc-code-0/" alt="微信分享二维码">
-    </div>
-</div>
-
-<div class="mask js-mask"></div>
-      
-      <div class="clearfix"></div>
-    </div>
+        <div class="clearfix"></div>
+    </header>
   </div>
 </article>
-
-  
-<nav id="article-nav">
-  
-    <a href="/2018/09/14/btc-code-transaction/" id="article-nav-newer" class="article-nav-link-wrap">
-      <i class="icon-circle-left"></i>
-      <div class="article-nav-title">
-        
-          比特币源码研读---交易
-        
-      </div>
-    </a>
   
   
-    <a href="/2018/03/14/linux-hacked/" id="article-nav-older" class="article-nav-link-wrap">
-      <div class="article-nav-title">记一次linux(被)入侵</div>
-      <i class="icon-circle-right"></i>
-    </a>
-  
-</nav>
-
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-  
-  
+    </div></section>
   
 
-  
-
-  
-
-  
+    
 
 
           </div>
@@ -344,8 +217,8 @@
 	var yiliaConfig = {
 		mathjax: false,
 		isHome: false,
-		isPost: true,
-		isArchive: false,
+		isPost: false,
+		isArchive: true,
 		isTag: false,
 		isCategory: false,
 		open_in_new: false,
