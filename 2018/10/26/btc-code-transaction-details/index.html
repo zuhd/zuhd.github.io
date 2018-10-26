@@ -6,14 +6,19 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="http://yoursite.com">
-  <title>Archives | zuhd&#39;s blog</title>
+  <title>比特币源码研读---交易细节 | zuhd&#39;s blog</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta property="og:type" content="website">
-<meta property="og:title" content="zuhd&#39;s blog">
-<meta property="og:url" content="http://yoursite.com/archives/index.html">
+  <meta name="description" content="0x00 读码即挖矿前两天看到群里还有人在讨论ETH和EOS的DAPP开发，看来区块链的落地还是一线希望，大家可以继续给自己的信仰充值。充值方式众多，比如加仓，Fomo，或是写DAPP，读代码。那我继续前两次的操作，继续阅读BTC的代码，版本0.8.2。上次粗读了一番交易的流程，大概的来龙去脉也略知一二，这次就按照关键的执行函数来扣一下具体的细节。 0x01 函数CreateTransaction">
+<meta name="keywords" content="区块链 比特币">
+<meta property="og:type" content="article">
+<meta property="og:title" content="比特币源码研读---交易细节">
+<meta property="og:url" content="http://yoursite.com/2018/10/26/btc-code-transaction-details/index.html">
 <meta property="og:site_name" content="zuhd&#39;s blog">
+<meta property="og:description" content="0x00 读码即挖矿前两天看到群里还有人在讨论ETH和EOS的DAPP开发，看来区块链的落地还是一线希望，大家可以继续给自己的信仰充值。充值方式众多，比如加仓，Fomo，或是写DAPP，读代码。那我继续前两次的操作，继续阅读BTC的代码，版本0.8.2。上次粗读了一番交易的流程，大概的来龙去脉也略知一二，这次就按照关键的执行函数来扣一下具体的细节。 0x01 函数CreateTransaction">
+<meta property="og:updated_time" content="2018-10-26T07:37:47.707Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="zuhd&#39;s blog">
+<meta name="twitter:title" content="比特币源码研读---交易细节">
+<meta name="twitter:description" content="0x00 读码即挖矿前两天看到群里还有人在讨论ETH和EOS的DAPP开发，看来区块链的落地还是一线希望，大家可以继续给自己的信仰充值。充值方式众多，比如加仓，Fomo，或是写DAPP，读代码。那我继续前两次的操作，继续阅读BTC的代码，版本0.8.2。上次粗读了一番交易的流程，大概的来龙去脉也略知一二，这次就按照关键的执行函数来扣一下具体的细节。 0x01 函数CreateTransaction">
   
     <link rel="alternative" href="/atom.xml" title="zuhd&#39;s blog" type="application/atom+xml">
   
@@ -141,36 +146,100 @@
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            
+            <article id="post-btc-code-transaction-details" class="article article-type-post " itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
   
+    <h1 class="article-title" itemprop="name">
+      比特币源码研读---交易细节
+    </h1>
   
-    
-    
-      
-      
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2018" class="archive-year">2018</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2018/10/26/btc-code-transaction-details/" class="archive-article-date">
+
+        
+        <a href="/2018/10/26/btc-code-transaction-details/" class="archive-article-date">
   	<time datetime="2018-10-26T07:36:28.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-10-26</time>
 </a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2018/10/26/btc-code-transaction-details/">比特币源码研读---交易细节</a>
-    </h1>
-  
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="0x00-读码即挖矿"><a href="#0x00-读码即挖矿" class="headerlink" title="0x00 读码即挖矿"></a>0x00 读码即挖矿</h1><p>前两天看到群里还有人在讨论ETH和EOS的DAPP开发，看来区块链的落地还是一线希望，大家可以继续给自己的信仰充值。充值方式众多，比如加仓，Fomo，或是写DAPP，读代码。那我继续前两次的操作，继续阅读BTC的代码，版本0.8.2。上次粗读了一番交易的流程，大概的来龙去脉也略知一二，这次就按照关键的执行函数来扣一下具体的细节。</p>
+<h1 id="0x01-函数CreateTransaction"><a href="#0x01-函数CreateTransaction" class="headerlink" title="0x01 函数CreateTransaction"></a>0x01 函数CreateTransaction</h1><p>函数原型如下：<br><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">bool</span> CWallet::CreateTransaction(<span class="keyword">const</span> <span class="built_in">vector</span>&lt;pair&lt;CScript, int64&gt; &gt;&amp; vecSend,</span><br><span class="line">                                CWalletTx&amp; wtxNew, CReserveKey&amp; reservekey, int64&amp; nFeeRet, <span class="built_in">std</span>::<span class="built_in">string</span>&amp; strFailReason)</span><br></pre></td></tr></table></figure></p>
+<p>我们先看一下该函数的具体引用，出现在rpcwallet.cpp中，具体的用途就是RPC调用，进行转账交易。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">Value <span class="title">sendmany</span><span class="params">(<span class="keyword">const</span> Array&amp; params, <span class="keyword">bool</span> fHelp)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    ...</span><br><span class="line">    ...</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Send</span></span><br><span class="line">    <span class="function">CReserveKey <span class="title">keyChange</span><span class="params">(pwalletMain)</span></span>;</span><br><span class="line">    int64 nFeeRequired = <span class="number">0</span>;</span><br><span class="line">    <span class="built_in">string</span> strFailReason;</span><br><span class="line">    <span class="keyword">bool</span> fCreated = pwalletMain-&gt;CreateTransaction(vecSend, wtx, keyChange, nFeeRequired, strFailReason);</span><br><span class="line">    <span class="keyword">if</span> (!fCreated)</span><br><span class="line">        <span class="keyword">throw</span> JSONRPCError(RPC_WALLET_INSUFFICIENT_FUNDS, strFailReason);</span><br><span class="line">    <span class="keyword">if</span> (!pwalletMain-&gt;CommitTransaction(wtx, keyChange))</span><br><span class="line">        <span class="keyword">throw</span> JSONRPCError(RPC_WALLET_ERROR, <span class="string">"Transaction commit failed"</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> wtx.GetHash().GetHex();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>现在来看CreateTransaction函数的返回值和参数：</p>
+<blockquote>
+<p>返回值：如果创建成功返回true，否则false<br>参数：<br>1，const vector<pair<cscript, int64=""> &gt;&amp; vecSend：目标地址和金额，数组，支持批量转账<br>2，CWalletTx&amp; wtxNew：生成的钱包关联交易详情<br>3，int64&amp; nFeeRet：gas费用<br>4，std::string&amp; strFailReason：失败原因</pair<cscript,></p>
+</blockquote>
+<p>整个代码的模块是一个loop，通过找到符合条件的utxo再break出来，看一看代码的内部实现：</p>
+<blockquote>
+<p>1，判断发送目标地址和金额是否合法，没啥好说的</p>
+</blockquote>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">int64 nValue = <span class="number">0</span>;</span><br><span class="line">BOOST_FOREACH (<span class="keyword">const</span> PAIRTYPE(CScript, int64)&amp; s, vecSend)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">if</span> (nValue &lt; <span class="number">0</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        strFailReason = _(<span class="string">"Transaction amounts must be positive"</span>);</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    nValue += s.second;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">if</span> (vecSend.empty() || nValue &lt; <span class="number">0</span>)</span><br><span class="line">&#123;</span><br><span class="line">    strFailReason = _(<span class="string">"Transaction amounts must be positive"</span>);</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>2，构造交易输出，并丢弃粉尘交易，防止DDOS攻击，这块下文会详细描述</p>
+</blockquote>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// vouts to the payees</span></span><br><span class="line">BOOST_FOREACH (<span class="keyword">const</span> PAIRTYPE(CScript, int64)&amp; s, vecSend)</span><br><span class="line">&#123;</span><br><span class="line">        <span class="function">CTxOut <span class="title">txout</span><span class="params">(s.second, s.first)</span></span>;</span><br><span class="line">        <span class="keyword">if</span> (txout.IsDust())</span><br><span class="line">        &#123;</span><br><span class="line">            strFailReason = _(<span class="string">"Transaction amount too small"</span>);</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        wtxNew.vout.push_back(txout);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>3，构造交易出入，也就是根据规则找到发送方最优的utxo集合，SelectCoins下文详细描述</p>
+</blockquote>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Choose coins to use</span></span><br><span class="line"><span class="built_in">set</span>&lt;pair&lt;<span class="keyword">const</span> CWalletTx*,<span class="keyword">unsigned</span> <span class="keyword">int</span>&gt; &gt; setCoins;</span><br><span class="line">int64 nValueIn = <span class="number">0</span>;</span><br><span class="line"><span class="keyword">if</span> (!SelectCoins(nTotalValue, setCoins, nValueIn))</span><br><span class="line">&#123;</span><br><span class="line">    strFailReason = _(<span class="string">"Insufficient funds"</span>);</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>4，先计算优先级，再根据优先级推导出交易费用，下文详细描述</p>
+</blockquote>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"> BOOST_FOREACH(PAIRTYPE(<span class="keyword">const</span> CWalletTx*, <span class="keyword">unsigned</span> <span class="keyword">int</span>) pcoin, setCoins)</span><br><span class="line">&#123;</span><br><span class="line">    int64 nCredit = pcoin.first-&gt;vout[pcoin.second].nValue;</span><br><span class="line">    <span class="comment">//The priority after the next block (depth+1) is used instead of the current,</span></span><br><span class="line">    <span class="comment">//reflecting an assumption the user would accept a bit more delay for</span></span><br><span class="line">    <span class="comment">//a chance at a free transaction.</span></span><br><span class="line">    dPriority += (<span class="keyword">double</span>)nCredit * (pcoin.first-&gt;GetDepthInMainChain()+<span class="number">1</span>)</span><br><span class="line">&#125;</span><br><span class="line">...</span><br><span class="line">dPriority /= nBytes;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>5，计算找零，并创建新的找零钱包公钥，把找零加入到vOut中</p>
+</blockquote>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line"> int64 nChange = nValueIn - nValue - nFeeRet;</span><br><span class="line"> <span class="comment">// if sub-cent change is required, the fee must be raised to at least nMinTxFee</span></span><br><span class="line"> <span class="comment">// or until nChange becomes zero</span></span><br><span class="line"> <span class="comment">// <span class="doctag">NOTE:</span> this depends on the exact behaviour of GetMinFee</span></span><br><span class="line">				</span><br><span class="line"> <span class="keyword">if</span> (nFeeRet &lt; CTransaction::nMinTxFee &amp;&amp; nChange &gt; <span class="number">0</span> &amp;&amp; nChange &lt; CENT)</span><br><span class="line"> &#123;</span><br><span class="line">    int64 nMoveToFee = min(nChange, CTransaction::nMinTxFee - nFeeRet);</span><br><span class="line">    nChange -= nMoveToFee;</span><br><span class="line">    nFeeRet += nMoveToFee;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> (nChange &gt; <span class="number">0</span>)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="comment">// Note: We use a new key here to keep it from being obvious which side is the change.</span></span><br><span class="line">    <span class="comment">//  The drawback is that by not reusing a previous key, the change may be lost if a</span></span><br><span class="line">    <span class="comment">//  backup is restored, if the backup doesn't have the new private key for the change.</span></span><br><span class="line">    <span class="comment">//  If we reused the old key, it would be possible to add code to look for and</span></span><br><span class="line">    <span class="comment">//  rediscover unknown transactions that were written with keys of ours to recover</span></span><br><span class="line">    <span class="comment">//  post-backup change.</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// Reserve a new key pair from key pool</span></span><br><span class="line">    CPubKey vchPubKey;</span><br><span class="line">    assert(reservekey.GetReservedKey(vchPubKey)); <span class="comment">// should never fail, as we just unlocked</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// Fill a vout to ourself</span></span><br><span class="line">    <span class="comment">// <span class="doctag">TODO:</span> pass in scriptChange instead of reservekey so</span></span><br><span class="line">    <span class="comment">// change transaction isn't always pay-to-bitcoin-address</span></span><br><span class="line">	<span class="comment">// 构建找零的新的公钥</span></span><br><span class="line">    CScript scriptChange;</span><br><span class="line">    scriptChange.SetDestination(vchPubKey.GetID());</span><br><span class="line"></span><br><span class="line">    <span class="function">CTxOut <span class="title">newTxOut</span><span class="params">(nChange, scriptChange)</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Never create dust outputs; if we would, just</span></span><br><span class="line">    <span class="comment">// add the dust to the fee.</span></span><br><span class="line">    <span class="keyword">if</span> (newTxOut.IsDust())</span><br><span class="line">    &#123;</span><br><span class="line">        nFeeRet += nChange;</span><br><span class="line">        reservekey.ReturnKey();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">    &#123;</span><br><span class="line">        <span class="comment">// Insert change txn at random position:</span></span><br><span class="line">        <span class="built_in">vector</span>&lt;CTxOut&gt;::iterator position = wtxNew.vout.begin()+GetRandInt(wtxNew.vout.size()+<span class="number">1</span>);</span><br><span class="line">        wtxNew.vout.insert(position, newTxOut);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">else</span></span><br><span class="line">    reservekey.ReturnKey();</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>6，签名，并计算交易费用，如果费用不满足条件，再重新进入循环，重复上述流程</p>
+</blockquote>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Fill vin</span></span><br><span class="line">BOOST_FOREACH(<span class="keyword">const</span> PAIRTYPE(<span class="keyword">const</span> CWalletTx*,<span class="keyword">unsigned</span> <span class="keyword">int</span>)&amp; coin, setCoins)</span><br><span class="line">                    wtxNew.vin.push_back(CTxIn(coin.first-&gt;GetHash(),coin.second));</span><br><span class="line"></span><br><span class="line"><span class="comment">// Sign</span></span><br><span class="line"><span class="keyword">int</span> nIn = <span class="number">0</span>;</span><br><span class="line">BOOST_FOREACH(<span class="keyword">const</span> PAIRTYPE(<span class="keyword">const</span> CWalletTx*,<span class="keyword">unsigned</span> <span class="keyword">int</span>)&amp; coin, setCoins)</span><br><span class="line">    <span class="keyword">if</span> (!SignSignature(*<span class="keyword">this</span>, *coin.first, wtxNew, nIn++))</span><br><span class="line">    &#123;</span><br><span class="line">        strFailReason = _(<span class="string">"Signing transaction failed"</span>);</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Limit size</span></span><br><span class="line"><span class="keyword">unsigned</span> <span class="keyword">int</span> nBytes = ::GetSerializeSize(*(CTransaction*)&amp;wtxNew, SER_NETWORK, PROTOCOL_VERSION);</span><br><span class="line"><span class="keyword">if</span> (nBytes &gt;= MAX_STANDARD_TX_SIZE)</span><br><span class="line">&#123;</span><br><span class="line">    strFailReason = _(<span class="string">"Transaction too large"</span>);</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">&#125;</span><br><span class="line">dPriority /= nBytes;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Check that enough fee is included</span></span><br><span class="line">int64 nPayFee = nTransactionFee * (<span class="number">1</span> + (int64)nBytes / <span class="number">1000</span>);</span><br><span class="line"><span class="keyword">bool</span> fAllowFree = CTransaction::AllowFree(dPriority);</span><br><span class="line">int64 nMinFee = wtxNew.GetMinFee(<span class="number">1</span>, fAllowFree, GMF_SEND);</span><br><span class="line"><span class="keyword">if</span> (nFeeRet &lt; max(nPayFee, nMinFee))</span><br><span class="line">&#123;</span><br><span class="line">    nFeeRet = max(nPayFee, nMinFee);</span><br><span class="line">    <span class="keyword">continue</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>7，填充好WalletTX的vIn和vOut后，用vIn的prevout来填充WalletTX的vtxPrev</p>
+</blockquote>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Fill vtxPrev by copying from previous transactions vtxPrev</span></span><br><span class="line">wtxNew.AddSupportingTransactions();</span><br><span class="line">wtxNew.fTimeReceivedIsTxTime = <span class="literal">true</span>;</span><br></pre></td></tr></table></figure>
+<h1 id="0x02-粉尘交易Dust"><a href="#0x02-粉尘交易Dust" class="headerlink" title="0x02 粉尘交易Dust"></a>0x02 粉尘交易Dust</h1><p>前文我们已经讲过，比特币的交易并不是传统意义上的数字加减运算，它实质是utxo的转移。所以A向B转移1个BTC这个动作，产生的结果是未知的，比如就可以是1个完整的BTC转移，也有可能是1000个0.001个BTC的转移，也有可能是1.05个BTC转移（0.05个找零），当然用户不需要自己去手工配置，代码已经帮我们完成(下文的SelectCoin)，但有时候还是无法避免有dust交易的产生。dust的存在会造成区块链网络上DDOS攻击，攻击者通过发送许多这样小金额的交易，来堵塞整个网络。在比特币的网络中，如果交易费(Fee)用高于1/3的交易价值(Value)，则被视为粉尘交易。 常规的来说，一个P2PKH交易，由于其最小体积时为一个输入，一个输出，总共 ‘148 + 34 = 182’ 字节，而交易手续费是由每个节点配置的minRelayTxFee（比特币中默认为’0.00001BTC/KB’）决定的，故而手续费就是 ‘182 / 1000 <em> minRelayTxFee’，那么其的3倍即 ‘546 / 1000 </em> minRelayTxFee’，也即默认为 0.00000546 BTC，在BCH网络上也是一样的。</p>
+<p>钱包在准备支付金额的时候有一个既定的规则，就是在众多输入（inputs）中筹备支付金额的时候尽量避免产生小于0.01BTC的金额变动（比如你要支付5.005BTC，钱包尽可能的选择3+2.005或者1+1+3.005，而不是5+0.005）。</p>
+<p>Dust代码描述如下：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">bool</span> CTxOut::IsDust() <span class="keyword">const</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="comment">// "Dust" is defined in terms of CTransaction::nMinRelayTxFee,</span></span><br><span class="line">    <span class="comment">// which has units satoshis-per-kilobyte.</span></span><br><span class="line">    <span class="comment">// If you'd pay more than 1/3 in fees</span></span><br><span class="line">    <span class="comment">// to spend something, then we consider it dust.</span></span><br><span class="line">    <span class="comment">// A typical txout is 33 bytes big, and will</span></span><br><span class="line">    <span class="comment">// need a CTxIn of at least 148 bytes to spend,</span></span><br><span class="line">    <span class="comment">// so dust is a txout less than 54 uBTC</span></span><br><span class="line">    <span class="comment">// (5430 satoshis) with default nMinRelayTxFee</span></span><br><span class="line">    <span class="keyword">return</span> ((nValue*<span class="number">1000</span>)/(<span class="number">3</span>*((<span class="keyword">int</span>)GetSerializeSize(SER_DISK,<span class="number">0</span>)+<span class="number">148</span>)) &lt; CTransaction::nMinRelayTxFee);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="0x03-交易费用计算Fee"><a href="#0x03-交易费用计算Fee" class="headerlink" title="0x03 交易费用计算Fee"></a>0x03 交易费用计算Fee</h1><blockquote>
+<p>数额越大、币龄（age）越高优先级越高</p>
+</blockquote>
+<p>如果你发送金额太小或者是你的比特币刚开采出来不久，那么你的转账就不再免费之列。每一个交易都会分配一个优先级，这个优先级通过币的新旧程度、交易的字节数和交易的数量。具体来说，对于每一个输入（inputs）来讲，客户端会先将比特币的数量乘以这些币在块中存在的时间（币龄，age），然后将所有的乘积加起来除以此次交易的大小（以字节为单位），计算公式：priority = sum(input_value_in_base_units * input_age)/size_in_bytes，计算结果如果小于0.576，那么该交易就必须支付手续费。如果你确实大量的小额输入，又想免费转出，这时候你可以加一个数额大的、币龄大的比特币金额(多余的找零返回)，就会将平均优先级提高，从而可以免费转出比特币。<br>代码如下：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">bool</span> <span class="title">AllowFree</span><span class="params">(<span class="keyword">double</span> dPriority)</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="comment">// Large (in bytes) low-priority (new, small-coin) transactions</span></span><br><span class="line">        <span class="comment">// need a fee.</span></span><br><span class="line">        <span class="keyword">return</span> dPriority &gt; COIN * <span class="number">144</span> / <span class="number">250</span>;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<p>在转账的最后客户端会检测本次转账的大小（以字节为单位），大小一般取决于输入和输出的数额大小。<br>如果该次转账的大小超过10000字节但是优先级符合免费的标准，那么仍然可以享受免费转账，否则需要支付手续费。没1000字节的费用默认是0.0001BTC，但是你也可以在客户端里进行追加，依次打开选项卡“设置&gt;选项&gt;主要”进行手续费的调整。<br>相关代码如下：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line">int64 CTransaction::GetMinFee(<span class="keyword">unsigned</span> <span class="keyword">int</span> nBlockSize, <span class="keyword">bool</span> fAllowFree,</span><br><span class="line">                              <span class="keyword">enum</span> GetMinFee_mode mode) <span class="keyword">const</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="comment">// Base fee is either nMinTxFee or nMinRelayTxFee</span></span><br><span class="line">    int64 nBaseFee = (mode == GMF_RELAY) ? nMinRelayTxFee : nMinTxFee;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">unsigned</span> <span class="keyword">int</span> nBytes = ::GetSerializeSize(*<span class="keyword">this</span>, SER_NETWORK, PROTOCOL_VERSION);</span><br><span class="line">    <span class="keyword">unsigned</span> <span class="keyword">int</span> nNewBlockSize = nBlockSize + nBytes;</span><br><span class="line">    int64 nMinFee = (<span class="number">1</span> + (int64)nBytes / <span class="number">1000</span>) * nBaseFee;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (fAllowFree)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">if</span> (nBlockSize == <span class="number">1</span>)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="comment">// Transactions under 10K are free</span></span><br><span class="line">            <span class="comment">// (about 4500 BTC if made of 50 BTC inputs)</span></span><br><span class="line">            <span class="keyword">if</span> (nBytes &lt; <span class="number">10000</span>)</span><br><span class="line">                nMinFee = <span class="number">0</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span></span><br><span class="line">        &#123;</span><br><span class="line">            <span class="comment">// Free transaction area</span></span><br><span class="line">            <span class="keyword">if</span> (nNewBlockSize &lt; <span class="number">27000</span>)</span><br><span class="line">                nMinFee = <span class="number">0</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// To limit dust spam, require base fee if any output is less than 0.01</span></span><br><span class="line">    <span class="keyword">if</span> (nMinFee &lt; nBaseFee)</span><br><span class="line">    &#123;</span><br><span class="line">        BOOST_FOREACH(<span class="keyword">const</span> CTxOut&amp; txout, vout)</span><br><span class="line">            <span class="keyword">if</span> (txout.nValue &lt; CENT)</span><br><span class="line">                nMinFee = nBaseFee;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Raise the price as the block approaches full</span></span><br><span class="line">    <span class="keyword">if</span> (nBlockSize != <span class="number">1</span> &amp;&amp; nNewBlockSize &gt;= MAX_BLOCK_SIZE_GEN/<span class="number">2</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">if</span> (nNewBlockSize &gt;= MAX_BLOCK_SIZE_GEN)</span><br><span class="line">            <span class="keyword">return</span> MAX_MONEY;</span><br><span class="line">        nMinFee *= MAX_BLOCK_SIZE_GEN / (MAX_BLOCK_SIZE_GEN - nNewBlockSize);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (!MoneyRange(nMinFee))</span><br><span class="line">        nMinFee = MAX_MONEY;</span><br><span class="line">    <span class="keyword">return</span> nMinFee;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="0x04-寻找最佳utxo集合策略SelectCoins"><a href="#0x04-寻找最佳utxo集合策略SelectCoins" class="headerlink" title="0x04 寻找最佳utxo集合策略SelectCoins"></a>0x04 寻找最佳utxo集合策略SelectCoins</h1><p>这个函数比较有意思，我们先看下函数实现</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">bool</span> CWallet::SelectCoins(int64 nTargetValue, <span class="built_in">set</span>&lt;pair&lt;<span class="keyword">const</span> CWalletTx*,<span class="keyword">unsigned</span> <span class="keyword">int</span>&gt; &gt;&amp; setCoinsRet, int64&amp; nValueRet) <span class="keyword">const</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="built_in">vector</span>&lt;COutput&gt; vCoins;</span><br><span class="line">    AvailableCoins(vCoins);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> (SelectCoinsMinConf(nTargetValue, <span class="number">1</span>, <span class="number">6</span>, vCoins, setCoinsRet, nValueRet) ||</span><br><span class="line">            SelectCoinsMinConf(nTargetValue, <span class="number">1</span>, <span class="number">1</span>, vCoins, setCoinsRet, nValueRet) ||</span><br><span class="line">            SelectCoinsMinConf(nTargetValue, <span class="number">0</span>, <span class="number">1</span>, vCoins, setCoinsRet, nValueRet));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>先说一说函数的返回值和参数</p>
+<blockquote>
+<p>返回值：成功找到TxIn的集合返回true，否则返回false<br>nTargetValue:目标金额<br>setCoinsRet：要返回的TxIn集合<br>nValueRet：实际金额（有可能包含找零）</p>
+</blockquote>
+<p>AvailabeCoins通过在当前钱包视图中预过滤筛选出COutput的集合，筛选策略主要是判断当前的引用输入是否经过确认等。<br>下一步再来看看SelectCoinsMinConf这个函数，看到（1，6）,（1，1），（0，1）这样的硬编码顿时就有一种紧张感，还好参数的命名比较直观。这三次相同函数不同参数的函数调用，其实反映了一种选择策略，就是按照交易被区块链确认次数递减来扩大选择范围，转账给自己优先要用通过1次确认的，转给别人要优先用通过6次确认的。这就是为什么我们现在在交易所进行法币场外交易时，交易所作为第三方担保，一般会在交易经过6次甚至更多次确认后才会把法币打给转出方，这样实施双花恶意攻击就会难上加难。</p>
+<p>再来说说SelectCoinsMinConf的策略：</p>
+<blockquote>
+<p>1，如果存在某UTXO值正好等于发送金额nValue（已包含手续费nFee），则将该UTXO加入目标交易集并返回成功<br>2，找出账户中UTXO值小于发送金额nValue的UTXO集vValue，并将vValue中所有UTXO值求和为nTotalLower，并找出所有UTXO值大于nValue的最小值nLowestLarger，再分两种情况<br>2.1：nTotalLower小于nValue，如果nLowestLarger存在，则将该值对应的pcoinLowestLarger交易加入目标交易集并返回成功，如果nLowestLarger不存在，则说明“余额”不足，返回失败<br>2.2：nTotalLower大于nValue，则使用随进逼近法（最多1000次）找出UTXO值的和nBest最接近nValue的集合vfBest，看nBest和nLowestLarger（如果存在）谁更接近nValue，则选择谁为相应的目标UTXO集，并返回成功</p>
+</blockquote>
+<p>代码如下：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">bool</span> CWallet::SelectCoinsMinConf(int64 nTargetValue, <span class="keyword">int</span> nConfMine, <span class="keyword">int</span> nConfTheirs, <span class="built_in">vector</span>&lt;COutput&gt; vCoins,</span><br><span class="line">                                 <span class="built_in">set</span>&lt;pair&lt;<span class="keyword">const</span> CWalletTx*,<span class="keyword">unsigned</span> <span class="keyword">int</span>&gt; &gt;&amp; setCoinsRet, int64&amp; nValueRet) <span class="keyword">const</span></span><br><span class="line">&#123;</span><br><span class="line">    setCoinsRet.clear();</span><br><span class="line">    nValueRet = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// List of values less than target</span></span><br><span class="line">    pair&lt;int64, pair&lt;<span class="keyword">const</span> CWalletTx*,<span class="keyword">unsigned</span> <span class="keyword">int</span>&gt; &gt; coinLowestLarger;</span><br><span class="line">    coinLowestLarger.first = <span class="built_in">std</span>::numeric_limits&lt;int64&gt;::max();</span><br><span class="line">    coinLowestLarger.second.first = <span class="literal">NULL</span>;</span><br><span class="line">    <span class="built_in">vector</span>&lt;pair&lt;int64, pair&lt;<span class="keyword">const</span> CWalletTx*,<span class="keyword">unsigned</span> <span class="keyword">int</span>&gt; &gt; &gt; vValue;</span><br><span class="line">    int64 nTotalLower = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">    random_shuffle(vCoins.begin(), vCoins.end(), GetRandInt);</span><br><span class="line"></span><br><span class="line">    BOOST_FOREACH(COutput output, vCoins)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">const</span> CWalletTx *pcoin = output.tx;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (output.nDepth &lt; (pcoin-&gt;IsFromMe() ? nConfMine : nConfTheirs))</span><br><span class="line">            <span class="keyword">continue</span>;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">int</span> i = output.i;</span><br><span class="line">        int64 n = pcoin-&gt;vout[i].nValue;</span><br><span class="line"></span><br><span class="line">        pair&lt;int64,pair&lt;<span class="keyword">const</span> CWalletTx*,<span class="keyword">unsigned</span> <span class="keyword">int</span>&gt; &gt; coin = make_pair(n,make_pair(pcoin, i));</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (n == nTargetValue)</span><br><span class="line">        &#123;</span><br><span class="line">            setCoinsRet.insert(coin.second);</span><br><span class="line">            nValueRet += coin.first;</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span> <span class="keyword">if</span> (n &lt; nTargetValue + CENT)</span><br><span class="line">        &#123;</span><br><span class="line">            vValue.push_back(coin);</span><br><span class="line">            nTotalLower += n;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span> <span class="keyword">if</span> (n &lt; coinLowestLarger.first)</span><br><span class="line">        &#123;</span><br><span class="line">            coinLowestLarger = coin;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (nTotalLower == nTargetValue)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">unsigned</span> <span class="keyword">int</span> i = <span class="number">0</span>; i &lt; vValue.size(); ++i)</span><br><span class="line">        &#123;</span><br><span class="line">            setCoinsRet.insert(vValue[i].second);</span><br><span class="line">            nValueRet += vValue[i].first;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (nTotalLower &lt; nTargetValue)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">if</span> (coinLowestLarger.second.first == <span class="literal">NULL</span>)</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">        setCoinsRet.insert(coinLowestLarger.second);</span><br><span class="line">        nValueRet += coinLowestLarger.first;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Solve subset sum by stochastic approximation</span></span><br><span class="line">    sort(vValue.rbegin(), vValue.rend(), CompareValueOnly());</span><br><span class="line">    <span class="built_in">vector</span>&lt;<span class="keyword">char</span>&gt; vfBest;</span><br><span class="line">    int64 nBest;</span><br><span class="line"></span><br><span class="line">    ApproximateBestSubset(vValue, nTotalLower, nTargetValue, vfBest, nBest, <span class="number">1000</span>);</span><br><span class="line">    <span class="keyword">if</span> (nBest != nTargetValue &amp;&amp; nTotalLower &gt;= nTargetValue + CENT)</span><br><span class="line">        ApproximateBestSubset(vValue, nTotalLower, nTargetValue + CENT, vfBest, nBest, <span class="number">1000</span>);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// If we have a bigger coin and (either the stochastic approximation didn't find a good solution,</span></span><br><span class="line">    <span class="comment">//                                   or the next bigger coin is closer), return the bigger coin</span></span><br><span class="line">    <span class="keyword">if</span> (coinLowestLarger.second.first &amp;&amp;</span><br><span class="line">        ((nBest != nTargetValue &amp;&amp; nBest &lt; nTargetValue + CENT) || coinLowestLarger.first &lt;= nBest))</span><br><span class="line">    &#123;</span><br><span class="line">        setCoinsRet.insert(coinLowestLarger.second);</span><br><span class="line">        nValueRet += coinLowestLarger.first;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">unsigned</span> <span class="keyword">int</span> i = <span class="number">0</span>; i &lt; vValue.size(); i++)</span><br><span class="line">            <span class="keyword">if</span> (vfBest[i])</span><br><span class="line">            &#123;</span><br><span class="line">                setCoinsRet.insert(vValue[i].second);</span><br><span class="line">                nValueRet += vValue[i].first;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">//// debug print</span></span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">"SelectCoins() best subset: "</span>);</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">unsigned</span> <span class="keyword">int</span> i = <span class="number">0</span>; i &lt; vValue.size(); i++)</span><br><span class="line">            <span class="keyword">if</span> (vfBest[i])</span><br><span class="line">                <span class="built_in">printf</span>(<span class="string">"%s "</span>, FormatMoney(vValue[i].first).c_str());</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">"total %s\n"</span>, FormatMoney(nBest).c_str());</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="0x05-总结"><a href="#0x05-总结" class="headerlink" title="0x05 总结"></a>0x05 总结</h1><p>从上面分析来看，交易的流程主要就是创建交易输出vOut，以及寻找到交易输入vIn，然后配置上gas，广播到网络节点中去。比特币的交易模块是整个区块链技术体系中比较重要的部分，也是比较晦涩难懂的部分，值得花上一些时间细细品读。由于本人水平有限，文中难免有理解不透的地方，还请大家多多指教！</p>
+<p>网友Black在我学习的过程中给出了大量的指点和帮助，特此感谢！</p>
+<blockquote>
+<p>参考：<br>1，<a href="http://www.btc38.com/btc/btc_learning/220.html" target="_blank" rel="external">http://www.btc38.com/btc/btc_learning/220.html</a><br>2，<a href="https://zhuanlan.zhihu.com/p/43203734" target="_blank" rel="external">https://zhuanlan.zhihu.com/p/43203734</a></p>
+</blockquote>
 
-        <div class="article-info info-on-right">
-          
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
 	<div class="article-tag tagcloud">
 		<i class="icon-price-tags icon"></i>
 		<ul class="article-tag-list">
@@ -182,295 +251,106 @@
 		</ul>
 	</div>
 
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2018/09/14/btc-code-transaction/" class="archive-article-date">
-  	<time datetime="2018-09-14T03:12:08.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-09-14</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2018/09/14/btc-code-transaction/">比特币源码研读---交易</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">区块链 比特币</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2018/08/09/btc-code-0/" class="archive-article-date">
-  	<time datetime="2018-08-09T11:30:22.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-08-09</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2018/08/09/btc-code-0/">比特币源码研读---开篇</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">区块链 比特币</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2018/03/14/linux-hacked/" class="archive-article-date">
-  	<time datetime="2018-03-14T08:01:34.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-03-14</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2018/03/14/linux-hacked/">记一次linux(被)入侵</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">服务器</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2018/03/09/my-blockchain/" class="archive-article-date">
-  	<time datetime="2018-03-09T05:42:22.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-03-09</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2018/03/09/my-blockchain/">我眼中的区块链</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">区块链</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2018/02/02/flask-redis/" class="archive-article-date">
-  	<time datetime="2018-02-02T08:39:34.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-02-02</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2018/02/02/flask-redis/">一次flask+redis的微服务实战</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">后台框架</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
       
-        </div></section>
+
       
+
       
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2017" class="archive-year">2017</a>
+        
+<div class="share-btn share-icons tooltip-left">
+  <div class="tooltip tooltip-east">
+    <span class="tooltip-item">
+      <a href="javascript:;" class="share-sns share-outer">
+        <i class="icon icon-share"></i>
+      </a>
+    </span>
+    <span class="tooltip-content">
+      <div class="share-wrap">
+        <div class="share-icons">
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="icon icon-weibo"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="icon icon-weixin"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="icon icon-qq"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="icon icon-douban"></i>
+          </a>
+          <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a>
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="icon icon-facebook"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="icon icon-twitter"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="icon icon-google"></i>
+          </a>
         </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2017/12/29/my2017/" class="archive-article-date">
-  	<time datetime="2017-12-29T11:29:34.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2017-12-29</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2017/12/29/my2017/">2017，我很怀念它</a>
-    </h1>
-  
+      </div>
+    </span>
+  </div>
+</div>
 
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">生活感悟</a>
-        		</li>
-      		
-		</ul>
-	</div>
+<div class="page-modal wx-share js-wx-box">
+    <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="http://s.jiathis.com/qrcode.php?url=http://yoursite.com/2018/10/26/btc-code-transaction-details/" alt="微信分享二维码">
+    </div>
+</div>
 
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
+<div class="mask js-mask"></div>
+      
+      <div class="clearfix"></div>
+    </div>
   </div>
 </article>
+
   
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2017/11/15/game-server-0/" class="archive-article-date">
-  	<time datetime="2017-11-15T06:47:34.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2017-11-15</time>
-</a>
+<nav id="article-nav">
+  
+  
+    <a href="/2018/09/14/btc-code-transaction/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">比特币源码研读---交易</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
         </div>
-    	 
+        
+        
+    </div>
+</aside>
+
+
+
   
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2017/11/15/game-server-0/">网络游戏服务器开发杂记---0</a>
-    </h1>
+  
   
 
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">网络游戏 服务器</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-  
-    </div></section>
   
 
-    
+  
+
+  
 
 
           </div>
@@ -493,8 +373,8 @@
 	var yiliaConfig = {
 		mathjax: false,
 		isHome: false,
-		isPost: false,
-		isArchive: true,
+		isPost: true,
+		isArchive: false,
 		isTag: false,
 		isCategory: false,
 		open_in_new: false,
