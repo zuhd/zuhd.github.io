@@ -8,20 +8,20 @@
   <link rel="dns-prefetch" href="http://yoursite.com">
   <title>网络游戏服务器开发杂记---区服管理 | zuhd&#39;s blog</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="#0x00 分区的概念经常玩游戏的朋友都知道，下载完游戏，注册完账号，就要进入选择区服了，比如以前双线机房还不普及的年代，会看到电信1区，电信2区。现在的游戏都是双网环境了，常见的分区如手Q1区，微信1区等。 #0x01 分区服务器的设计先来解决第一个问题，这些区服的列表信息如何获取。一般的解决方案就是使用http请求来返回json数据，我们称这个服务器为索引服务器，这个索引服务器可以做成多点负载">
+  <meta name="description" content="0x00 分区的概念经常玩游戏的朋友都知道，下载完游戏，注册完账号，就要进入选择区服了，比如以前双线机房还不普及的年代，会看到电信1区，电信2区。现在的游戏都是双网环境了，常见的分区如手Q1区，微信1区等。 0x01 分区服务器的设计先来解决第一个问题，这些区服的列表信息如何获取。一般的解决方案就是使用http请求来返回json数据，我们称这个服务器为索引服务器，这个索引服务器可以做成多点负载均衡">
 <meta name="keywords" content="网络游戏 服务器">
 <meta property="og:type" content="article">
 <meta property="og:title" content="网络游戏服务器开发杂记---区服管理">
 <meta property="og:url" content="http://yoursite.com/2019/01/07/game-server-indexserver/index.html">
 <meta property="og:site_name" content="zuhd&#39;s blog">
-<meta property="og:description" content="#0x00 分区的概念经常玩游戏的朋友都知道，下载完游戏，注册完账号，就要进入选择区服了，比如以前双线机房还不普及的年代，会看到电信1区，电信2区。现在的游戏都是双网环境了，常见的分区如手Q1区，微信1区等。 #0x01 分区服务器的设计先来解决第一个问题，这些区服的列表信息如何获取。一般的解决方案就是使用http请求来返回json数据，我们称这个服务器为索引服务器，这个索引服务器可以做成多点负载">
+<meta property="og:description" content="0x00 分区的概念经常玩游戏的朋友都知道，下载完游戏，注册完账号，就要进入选择区服了，比如以前双线机房还不普及的年代，会看到电信1区，电信2区。现在的游戏都是双网环境了，常见的分区如手Q1区，微信1区等。 0x01 分区服务器的设计先来解决第一个问题，这些区服的列表信息如何获取。一般的解决方案就是使用http请求来返回json数据，我们称这个服务器为索引服务器，这个索引服务器可以做成多点负载均衡">
 <meta property="og:image" content="https://upload-images.jianshu.io/upload_images/1890474-5fdabf16ea1cba0a.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
 <meta property="og:image" content="https://upload-images.jianshu.io/upload_images/1890474-120c44b249beea45.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
 <meta property="og:image" content="https://upload-images.jianshu.io/upload_images/1890474-67c8a904e31a7d81.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
-<meta property="og:updated_time" content="2019-01-07T09:32:38.585Z">
+<meta property="og:updated_time" content="2019-01-07T09:37:55.576Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="网络游戏服务器开发杂记---区服管理">
-<meta name="twitter:description" content="#0x00 分区的概念经常玩游戏的朋友都知道，下载完游戏，注册完账号，就要进入选择区服了，比如以前双线机房还不普及的年代，会看到电信1区，电信2区。现在的游戏都是双网环境了，常见的分区如手Q1区，微信1区等。 #0x01 分区服务器的设计先来解决第一个问题，这些区服的列表信息如何获取。一般的解决方案就是使用http请求来返回json数据，我们称这个服务器为索引服务器，这个索引服务器可以做成多点负载">
+<meta name="twitter:description" content="0x00 分区的概念经常玩游戏的朋友都知道，下载完游戏，注册完账号，就要进入选择区服了，比如以前双线机房还不普及的年代，会看到电信1区，电信2区。现在的游戏都是双网环境了，常见的分区如手Q1区，微信1区等。 0x01 分区服务器的设计先来解决第一个问题，这些区服的列表信息如何获取。一般的解决方案就是使用http请求来返回json数据，我们称这个服务器为索引服务器，这个索引服务器可以做成多点负载均衡">
 <meta name="twitter:image" content="https://upload-images.jianshu.io/upload_images/1890474-5fdabf16ea1cba0a.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
   
     <link rel="alternative" href="/atom.xml" title="zuhd&#39;s blog" type="application/atom+xml">
@@ -174,11 +174,11 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <p>#0x00 分区的概念<br>经常玩游戏的朋友都知道，下载完游戏，注册完账号，就要进入选择区服了，比如以前双线机房还不普及的年代，会看到电信1区，电信2区。现在的游戏都是双网环境了，常见的分区如手Q1区，微信1区等。<br><img src="https://upload-images.jianshu.io/upload_images/1890474-5fdabf16ea1cba0a.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="wow"></p>
-<p>#0x01 分区服务器的设计<br>先来解决第一个问题，这些区服的列表信息如何获取。一般的解决方案就是使用http请求来返回json数据，我们称这个服务器为索引服务器，这个索引服务器可以做成多点负载均衡，返回的json数据可以通过配置或是数据库文件来完成，它是能满足热跟新和多点容灾切换的，简单的说它就是一个微服务。设计如下图。<br><img src="https://upload-images.jianshu.io/upload_images/1890474-120c44b249beea45.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="WebSever"></p>
-<p>#0x02 区服服务器的连接信息<br>每一个区服背后会关联1个或是多个网关服务器，这些网关服务器会和账号中心AccountServer保持连接，同时也会和服务器监控中心CenterServer保持连接。AccountServer做的功能非常的简单专一，就是对客户端发过来的username和md5(password)做匹配校验，并把校验后的结果返回给GateServer，再由GateServer返回给玩家。当玩家的用户校验成功的情况下，GateServer还会通知CenterServer，当前的玩家的账号验证通过，并且让CenterServer按照一定的算法生成一个动态的Token保存下来，并且把该Token发给客户端保存下来，做为每次切换服务器的凭证，在玩家下线之后该Token失效，下次上线的时候重新生成。同时CenterServer还兼任着管理账号状态的功能，比如该账号是否有异常等。简单的讲，就是客户端每次在网关发起切换场景的时候，如果发生了切换进程行为，都必须要携带Token进行二次验证。这样做的目的是什么呢，我们假设这样一个场景，当玩家停留在角色选择界面，没有进入到一个具体的场景，同时通讯协议被破解了，而且没有Token校验，那外挂就很容易绕过登陆直接登陆场景了。<br><img src="https://upload-images.jianshu.io/upload_images/1890474-67c8a904e31a7d81.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="服务器"></p>
+        <h1 id="0x00-分区的概念"><a href="#0x00-分区的概念" class="headerlink" title="0x00 分区的概念"></a>0x00 分区的概念</h1><p>经常玩游戏的朋友都知道，下载完游戏，注册完账号，就要进入选择区服了，比如以前双线机房还不普及的年代，会看到电信1区，电信2区。现在的游戏都是双网环境了，常见的分区如手Q1区，微信1区等。<br><img src="https://upload-images.jianshu.io/upload_images/1890474-5fdabf16ea1cba0a.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="wow"></p>
+<h1 id="0x01-分区服务器的设计"><a href="#0x01-分区服务器的设计" class="headerlink" title="0x01 分区服务器的设计"></a>0x01 分区服务器的设计</h1><p>先来解决第一个问题，这些区服的列表信息如何获取。一般的解决方案就是使用http请求来返回json数据，我们称这个服务器为索引服务器，这个索引服务器可以做成多点负载均衡，返回的json数据可以通过配置或是数据库文件来完成，它是能满足热跟新和多点容灾切换的，简单的说它就是一个微服务。设计如下图。<br><img src="https://upload-images.jianshu.io/upload_images/1890474-120c44b249beea45.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="WebSever"></p>
+<h1 id="0x02-区服服务器的连接信息"><a href="#0x02-区服服务器的连接信息" class="headerlink" title="0x02 区服服务器的连接信息"></a>0x02 区服服务器的连接信息</h1><p>每一个区服背后会关联1个或是多个网关服务器，这些网关服务器会和账号中心AccountServer保持连接，同时也会和服务器监控中心CenterServer保持连接。AccountServer做的功能非常的简单专一，就是对客户端发过来的username和md5(password)做匹配校验，并把校验后的结果返回给GateServer，再由GateServer返回给玩家。当玩家的用户校验成功的情况下，GateServer还会通知CenterServer，当前的玩家的账号验证通过，并且让CenterServer按照一定的算法生成一个动态的Token保存下来，并且把该Token发给客户端保存下来，做为每次切换服务器的凭证，在玩家下线之后该Token失效，下次上线的时候重新生成。同时CenterServer还兼任着管理账号状态的功能，比如该账号是否有异常等。简单的讲，就是客户端每次在网关发起切换场景的时候，如果发生了切换进程行为，都必须要携带Token进行二次验证。这样做的目的是什么呢，我们假设这样一个场景，当玩家停留在角色选择界面，没有进入到一个具体的场景，同时通讯协议被破解了，而且没有Token校验，那外挂就很容易绕过登陆直接登陆场景了。<br><img src="https://upload-images.jianshu.io/upload_images/1890474-67c8a904e31a7d81.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="服务器"></p>
 <p>大区分好了，那里面的服又是怎么划分的呢？我们现在通常看到的大区里面通常都是一组服务器，也就是说该区只划分了一个游戏世界。这里所说的游戏世界，就是一个账号的角色所产生的所有数据。这样说起来可能还是有点绕口，简单概括就是当前的流行的微信1区，其实这个1区就只有1个游戏世界，因为他们并没有做多服的分配，如果按照大型游戏的做法，1区内还是可以划分为1服，2服的，当然1服和2服加起来就是1个区下面有2个游戏世界了。</p>
-<p>#0x03 内部服务器构成<br>那1个游戏世界里又有哪些服务器呢，这个要看游戏的类型和复杂程度了，通常的做法是划分为网关服务器GateServer，游戏服务器GameServer，地图管理器MapServer，日志服务器LogServer，数据库代理DBProxy，关系服务器RelationServer，充值服务器BillingServer，当然也有做的更加细分的，如战斗服务器BattleServer，角色信息服务器InfoServer等等。这些可以根据架构师的经验和对项目的运营周期评估做出合理的剪裁，没有最好的架构，只有最适合自己的。</p>
+<h1 id="0x03-内部服务器构成"><a href="#0x03-内部服务器构成" class="headerlink" title="0x03 内部服务器构成"></a>0x03 内部服务器构成</h1><p>那1个游戏世界里又有哪些服务器呢，这个要看游戏的类型和复杂程度了，通常的做法是划分为网关服务器GateServer，游戏服务器GameServer，地图管理器MapServer，日志服务器LogServer，数据库代理DBProxy，关系服务器RelationServer，充值服务器BillingServer，当然也有做的更加细分的，如战斗服务器BattleServer，角色信息服务器InfoServer等等。这些可以根据架构师的经验和对项目的运营周期评估做出合理的剪裁，没有最好的架构，只有最适合自己的。</p>
 <p>总结一下，今天讲的区服管理是进入游戏前的第一步，它的逻辑简单容易理解，接下来的计划就是模拟正常玩家的游戏生命周期来逐个环节的分析，遇到重点的模块会单独的花点时间分析，比如任务，战场，副本等。下一个章节我们讲解账号和角色管理。</p>
 
       
