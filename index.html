@@ -150,6 +150,101 @@
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-game-server-rolelist" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/01/18/game-server-rolelist/">网络游戏服务器开发杂记---角色列表</a>
+    </h1>
+  
+
+        
+        <a href="/2019/01/18/game-server-rolelist/" class="archive-article-date">
+  	<time datetime="2019-01-18T08:48:38.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2019-01-18</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="0x00-回顾"><a href="#0x00-回顾" class="headerlink" title="0x00 回顾"></a>0x00 回顾</h1><p>上一篇文章中我们讲到了游戏中的区服划分，其中也提到了一些账号登陆的流程。那这个小节我们好好梳理一下登陆的流程，以及登陆中遇到的一些异常情况，到最后的成功获取角色列表。</p>
+<p>还记得我们上个小节中讲到的，账号密码验证成功后，登陆网关服务器（LoginGateServer）会获取到这个ack的信息，并且向中心服务器（CenterServer）去查询当前账号状态，并由CenterServer分配下一阶段的路由。这里大概会遇到以下的几种异常：</p>
+<h5 id="1，账号异常"><a href="#1，账号异常" class="headerlink" title="1，账号异常"></a>1，账号异常</h5><p>这里的异常一般是针对账号安全所做的一些保护措施，可以做分级处理。举个例子，当发现与上次登陆的城市不同的时候，或是与上次登陆的设备ID不同的时候，就要给玩家发出安全确认的请求，常见的如各种奇葩的验证码，或是手机pin码，游戏采取实名制之后，后者最为常见。</p>
+<p>另一种异常是运营中的常见手段，如封号，或是禁言等，当然也可以针对角色来做，那样更灵活，不过以国内的网游环境来讲，一般就是直接封账号，没啥好商量的。一个角色出现问题，同一个游戏世界内的其他角色都会受到牵连。</p>
+<h5 id="2，游戏人数拥挤，没有坑位"><a href="#2，游戏人数拥挤，没有坑位" class="headerlink" title="2，游戏人数拥挤，没有坑位"></a>2，游戏人数拥挤，没有坑位</h5><p>CenterServer会定时的去采集每一个与游戏服务器相连的网关服务器（GameGateServer）的负载情况。如果有空闲的坑位，CenterServer会把新的链接路由过去。如果当前游戏很火爆，如开服的第一天，很可能所有服务器都没有坑位了，那么CenterServer就会把当前的链接放到一个队列里，并且每隔一段时间会把当前队列的状态广播给所有的排队玩家，大家最关心的就是前面还有多少人。</p>
+<p>如果当前账号一切正常，那么中心服务器会给当前链接分配一个新的游戏网关GameGateServer，包括这个服务器的ID，IP，Port，用户就会尝试去链接该GameGateServer，连接成功后，原来与LoginGateServer的链接就会关闭掉，空出资源。<br>到此为止，账号处理的相关流程，基本完毕，开始进行游戏内的数据加载。当然第一步就是加载当前游戏世界内的所有角色信息。<br><img src="https://upload-images.jianshu.io/upload_images/1890474-2d8de581f02e3ea8.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="流程图"></p>
+<h1 id="0x01-角色列表"><a href="#0x01-角色列表" class="headerlink" title="0x01 角色列表"></a>0x01 角色列表</h1><p>我们回忆一下，在通常的角色列表界面，我们能看到什么？</p>
+<blockquote>
+<p>1，角色名称<br>2，角色等级<br>3，角色性别<br>4，角色职业<br>5，角色装备<br>6，角色时装</p>
+</blockquote>
+<p>这些是最基础的，通常也是必须显示的，其他还有一些策划会按照自己的习惯来要求的，各不相同，比如有：</p>
+<blockquote>
+<p>1，角色工会<br>2，角色VIP等级<br>3，角色宠物<br>4，角色坐骑<br>5，…</p>
+</blockquote>
+<p>那有哪些字段我们不需要呢？</p>
+<blockquote>
+<p>1，角色属性<br>2，角色货币信息<br>3，角色好友信息<br>4，角色邮箱信息<br>5，…</p>
+</blockquote>
+<p>类似于这种只有在游戏场景中才使用到的字段，在当前界面并不需要展示，所以也不用添加在通讯协议中。<br><img src="https://upload-images.jianshu.io/upload_images/1890474-4a8b9e475c39370a.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="wow"><br>针对上面所述，我们应该也能设计出前后台的通讯协议了。</p>
+<p>还有一些我们必需的字段，是我们看不到的，比如角色上次下线时所在的地图ID，以及在该地图的坐标（X，Y，Z），角色再次上线，我们要把它摆放在原来的位置。当然这是下一步的事情，到目前为止，我们已经登陆成功，并且把角色列表成功显示，本小节的任务也就完成了。</p>
+<p>#0x03 总结</p>
+<p>游戏的登陆逻辑不复杂，但需要注意的点会很琐碎，异常分级要做配置，避免硬编码。最后，留一个小问题，就是在游戏中什么时候需要重新验证登陆，什么时候只是切换服务器连接。这个问题考虑清楚了，对登陆流程也就没什么问题了。下一个小节，我们来探讨一下角色场景加载。</p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">网络游戏, 服务器</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2019/01/18/game-server-rolelist/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-game-server-indexserver" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1274,6 +1369,10 @@ getOwnMetadataKeys:function(t){return o(i(t),arguments.length<2?void 0:u(argumen
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color3">区块链 比特币</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">网络游戏, 服务器</a>
               </li>
             
             <div class="clearfix"></div>
